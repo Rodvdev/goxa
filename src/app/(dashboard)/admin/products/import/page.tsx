@@ -4,6 +4,18 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Upload, FileSpreadsheet, AlertCircle, CheckCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { useSession } from 'next-auth/react';
+
+interface ProductPreview {
+  sku: string;
+  nombre: string;
+  precio: string | number;
+  tipoProducto: string;
+  unidadDeVenta: string;
+  stock: string | number;
+  marca: string;
+  categoria: string;
+}
 
 interface ImportResult {
   success: boolean;
@@ -18,39 +30,23 @@ interface ImportResult {
   };
 }
 
-interface ProductPreview {
-  sku: string;
-  nombre: string;
-  precio: string;
-  tipoProducto: string;
-  unidadDeVenta: string;
-  stock: string;
-  marca: string;
-  categoria: string;
-}
-
-// Nuevo tipo para los datos de los productos importados
-interface ProductImportData {
-  SKU?: string;
-  sku?: string;
-  Nombre?: string;
-  nombre?: string;
-  Precio?: string;
-  precio?: string;
-  TipoProducto?: string;
-  tipoProducto?: string;
-  UnidadDeVenta?: string;
-  unidadDeVenta?: string;
-  Stock?: string;
-  stock?: string;
-  Marca?: string;
-  marca?: string;
-  Categoria?: string;
-  categoria?: string;
-  [key: string]: string | undefined;
+interface ParsedData {
+  SKU: string;
+  Nombre: string;
+  Precio: string;
+  TipoProducto: string;
+  UnidadDeVenta: string;
+  Presentacion: string;
+  UnidadMedida: string;
+  Contenido: string;
+  Stock: string;
+  MargenCommission: string;
+  Marca: string;
+  Categoria: string;
 }
 
 export default function ImportProductsPage() {
+  const { data: session, status } = useSession();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +54,31 @@ export default function ImportProductsPage() {
   const [step, setStep] = useState<'upload' | 'preview' | 'result'>('upload');
   const [previewData, setPreviewData] = useState<ProductPreview[]>([]);
   const [parseLoading, setParseLoading] = useState(false);
+
+  // Verificar si el usuario está autenticado y es admin
+  if (status === 'loading') {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!session || session.user.role !== 'ADMIN') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+        <h2 className="text-2xl font-bold mb-2">Acceso no autorizado</h2>
+        <p className="text-gray-600 mb-4">No tienes permisos para acceder a esta página.</p>
+        <Link 
+          href="/admin/products" 
+          className="text-blue-600 hover:text-blue-800"
+        >
+          Volver a Productos
+        </Link>
+      </div>
+    );
+  }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -80,14 +101,14 @@ export default function ImportProductsPage() {
       if (data && data.length > 0) {
         // Tomamos solo las primeras 100 filas para la vista previa
         const preview = data.slice(0, 100).map(row => ({
-          sku: row.SKU || row.sku || '',
-          nombre: row.Nombre || row.nombre || '',
-          precio: row.Precio || row.precio || '',
-          tipoProducto: row.TipoProducto || row.tipoProducto || '',
-          unidadDeVenta: row.UnidadDeVenta || row.unidadDeVenta || '',
-          stock: row.Stock || row.stock || '',
-          marca: row.Marca || row.marca || '',
-          categoria: row.Categoria || row.categoria || ''
+          sku: row.SKU || '',
+          nombre: row.Nombre || '',
+          precio: row.Precio || '',
+          tipoProducto: row.TipoProducto || '',
+          unidadDeVenta: row.UnidadDeVenta || '',
+          stock: row.Stock || '',
+          marca: row.Marca || '',
+          categoria: row.Categoria || ''
         }));
         
         setPreviewData(preview);
@@ -103,7 +124,7 @@ export default function ImportProductsPage() {
     }
   };
 
-  const readFileData = (file: File): Promise<ProductImportData[]> => {
+  const readFileData = (file: File): Promise<ParsedData[]> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       
@@ -115,7 +136,7 @@ export default function ImportProductsPage() {
             return;
           }
           
-          let parsedData: ProductImportData[] = [];
+          let parsedData: ParsedData[] = [];
           
           // Procesar según tipo de archivo
           if (file.name.endsWith('.csv')) {
@@ -147,16 +168,29 @@ export default function ImportProductsPage() {
     });
   };
   
-  const parseCSV = (csvText: string): ProductImportData[] => {
+  const parseCSV = (csvText: string): ParsedData[] => {
     const lines = csvText.split('\n');
     const headers = lines[0].split(',').map(header => header.trim());
     
     return lines.slice(1).filter(line => line.trim()).map(line => {
       const values = line.split(',').map(value => value.trim());
-      const row: ProductImportData = {};
+      const row: ParsedData = {
+        SKU: '',
+        Nombre: '',
+        Precio: '',
+        TipoProducto: '',
+        UnidadDeVenta: '',
+        Presentacion: '',
+        UnidadMedida: '',
+        Contenido: '',
+        Stock: '',
+        MargenCommission: '',
+        Marca: '',
+        Categoria: ''
+      };
       
       headers.forEach((header, index) => {
-        row[header] = values[index] || '';
+        row[header as keyof ParsedData] = values[index] || '';
       });
       
       return row;
@@ -178,15 +212,15 @@ export default function ImportProductsPage() {
       const response = await fetch('/api/admin/products/import', {
         method: 'POST',
         body: formData,
+        credentials: 'include', // Asegura que las cookies de sesión se envíen
       });
       
       const result = await response.json();
       
       setLoading(false);
       
-      if (!result.success) {
-        setError(result.message || 'Error durante la importación');
-        return;
+      if (!response.ok) {
+        throw new Error(result.error || result.message || 'Error durante la importación');
       }
       
       setImportResult(result);
@@ -195,7 +229,7 @@ export default function ImportProductsPage() {
     } catch (error) {
       console.error('Error importing products:', error);
       setLoading(false);
-      setError('Ocurrió un error durante la importación. Inténtelo de nuevo.');
+      setError(error instanceof Error ? error.message : 'Ocurrió un error durante la importación. Inténtelo de nuevo.');
     }
   };
 
@@ -253,56 +287,37 @@ export default function ImportProductsPage() {
               </button>
             </div>
 
-            <div className="mb-6 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <div className="flex flex-col items-center justify-center">
-                <Upload className="h-10 w-10 text-blue-500 mb-2" />
-                <span className="text-gray-700 font-medium mb-4">
-                  {file ? `Archivo seleccionado: ${file.name}` : 'Selecciona tu archivo Excel o CSV'}
-                </span>
-                
-                {/* Input de archivo visible y estilizado */}
+            <div className="flex justify-center">
+              <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center">
+                <Upload className="w-4 h-4 mr-2" />
+                Seleccionar archivo
                 <input
                   type="file"
+                  className="hidden"
                   accept=".xlsx,.xls,.csv"
                   onChange={handleFileChange}
-                  className="block w-full max-w-xs text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-blue-600 file:text-white
-                    hover:file:bg-blue-700
-                    cursor-pointer"
                 />
-                
-                <span className="text-gray-500 text-sm mt-2">
-                  Archivos soportados: .xlsx, .xls, .csv
-                </span>
-              </div>
+              </label>
             </div>
 
             {error && (
-              <div className="mb-6 bg-red-50 p-4 rounded-md flex items-start">
-                <AlertCircle className="text-red-500 w-5 h-5 mr-2 mt-0.5" />
-                <span className="text-red-700">{error}</span>
+              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
               </div>
             )}
-
-            <div className="border-t pt-4 mt-6">
-              <h3 className="font-medium mb-2">Consideraciones importantes:</h3>
-              <ul className="list-disc pl-5 text-gray-700 space-y-1">
-                <li>El archivo debe contener las columnas: SKU, Nombre, Precio, Tipo (CORE/NO_CORE), Unidad (UNIDAD/PESO), Stock, Marca y Categoría.</li>
-                <li>Los productos con SKU existente se actualizarán.</li>
-                <li>Las marcas y categorías se crearán automáticamente si no existen.</li>
-                <li>El margen de comisión por defecto será 10% si no se especifica.</li>
-              </ul>
-            </div>
           </>
         )}
 
         {step === 'preview' && (
           <>
-            <h2 className="text-xl font-semibold mb-6">Vista previa de importación</h2>
-            
+            <div className="mb-4">
+              <p className="text-gray-700">
+                Se importarán <span className="font-semibold">{previewData.length}</span> productos
+                desde el archivo <span className="font-semibold">{file?.name}</span>.
+                {previewData.length >= 100 && ' (Mostrando primeras 100 filas)'}
+              </p>
+            </div>
+
             {parseLoading ? (
               <div className="flex justify-center items-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
@@ -310,14 +325,6 @@ export default function ImportProductsPage() {
               </div>
             ) : (
               <>
-                <div className="mb-4">
-                  <p className="text-gray-700">
-                    Se importarán <span className="font-semibold">{previewData.length}</span> productos
-                    desde el archivo <span className="font-semibold">{file?.name}</span>.
-                    {previewData.length >= 100 && ' (Mostrando primeras 100 filas)'}
-                  </p>
-                </div>
-
                 <div className="overflow-x-auto mb-6">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -348,35 +355,35 @@ export default function ImportProductsPage() {
                     </tbody>
                   </table>
                 </div>
+
+                <div className="flex justify-end space-x-4">
+                  <button
+                    onClick={handleCancelImport}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    disabled={loading}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleImport}
+                    disabled={loading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                        Importando...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Confirmar Importación
+                      </>
+                    )}
+                  </button>
+                </div>
               </>
             )}
-
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={handleCancelImport}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                disabled={loading}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleImport}
-                disabled={loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                    Importando...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4 mr-2" />
-                    Confirmar Importación
-                  </>
-                )}
-              </button>
-            </div>
           </>
         )}
 
@@ -384,52 +391,51 @@ export default function ImportProductsPage() {
           <>
             <div className="text-center mb-8">
               {importResult.success ? (
-                <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
+                <>
+                  <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
+                  <h2 className="text-xl font-semibold mb-2">Importación Exitosa</h2>
+                  <p className="text-gray-600 mb-4">{importResult.message}</p>
+                </>
               ) : (
-                <AlertCircle className="mx-auto h-16 w-16 text-yellow-500 mb-4" />
+                <>
+                  <AlertCircle className="mx-auto h-16 w-16 text-red-500 mb-4" />
+                  <h2 className="text-xl font-semibold mb-2">Error en la Importación</h2>
+                  <p className="text-gray-600 mb-4">{importResult.message}</p>
+                </>
               )}
-              <h2 className="text-xl font-semibold mb-2">{importResult.message}</h2>
             </div>
 
             {importResult.details && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <h3 className="font-medium mb-3">Resumen de importación</h3>
-                  <ul className="space-y-2">
-                    <li className="flex justify-between">
-                      <span>Productos totales:</span>
-                      <span className="font-medium">{importResult.details.totalProducts}</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>Productos nuevos:</span>
-                      <span className="font-medium text-green-600">{importResult.details.newProducts}</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>Productos actualizados:</span>
-                      <span className="font-medium text-blue-600">{importResult.details.updatedProducts}</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <h3 className="font-medium mb-3">Entidades creadas</h3>
-                  <ul className="space-y-2">
-                    <li className="flex justify-between">
-                      <span>Marcas nuevas:</span>
-                      <span className="font-medium">{importResult.details.newBrands}</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>Categorías nuevas:</span>
-                      <span className="font-medium">{importResult.details.newCategories}</span>
-                    </li>
-                  </ul>
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-2">Resumen de la Importación</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Total de Productos</p>
+                    <p className="text-lg font-semibold">{importResult.details.totalProducts}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Nuevos Productos</p>
+                    <p className="text-lg font-semibold">{importResult.details.newProducts}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Productos Actualizados</p>
+                    <p className="text-lg font-semibold">{importResult.details.updatedProducts}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Nuevas Marcas</p>
+                    <p className="text-lg font-semibold">{importResult.details.newBrands}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-500">Nuevas Categorías</p>
+                    <p className="text-lg font-semibold">{importResult.details.newCategories}</p>
+                  </div>
                 </div>
               </div>
             )}
 
-            {importResult.details?.errors.length ? (
+            {importResult.details?.errors && importResult.details.errors.length > 0 && (
               <div className="mb-6">
-                <h3 className="font-medium mb-3 text-red-600">Errores encontrados</h3>
+                <h3 className="text-lg font-medium mb-2">Errores Encontrados</h3>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -440,16 +446,16 @@ export default function ImportProductsPage() {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {importResult.details.errors.map((error, index) => (
-                        <tr key={index}>
+                        <tr key={index} className="hover:bg-gray-50">
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{error.row}</td>
-                          <td className="px-4 py-3 text-sm text-red-600">{error.message}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-red-600">{error.message}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               </div>
-            ) : null}
+            )}
 
             <div className="flex justify-end space-x-4">
               <Link 

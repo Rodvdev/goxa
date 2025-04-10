@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/options';
+import * as XLSX from 'xlsx';
 
 const prisma = new PrismaClient();
 
@@ -10,32 +12,100 @@ type UnidadDeVenta = 'PESO' | 'UNIDAD';
 type Presentacion = 'VIDRIO' | 'PLANTA' | 'EMPAQUETADO';
 type UnidadMedida = 'GR' | 'KG' | 'ML' | 'UNIDAD';
 
+interface ProductImportData {
+  SKU?: string;
+  sku?: string;
+  Nombre?: string;
+  nombre?: string;
+  Precio?: number;
+  precio?: number;
+  TipoProducto?: string;
+  tipoProducto?: string;
+  UnidadDeVenta?: string;
+  unidadDeVenta?: string;
+  Presentacion?: string;
+  presentacion?: string;
+  UnidadMedida?: string;
+  unidadMedida?: string;
+  Contenido?: number;
+  contenido?: number;
+  Stock?: number;
+  stock?: number;
+  MargenCommission?: number;
+  margenCommission?: number;
+  Marca?: string;
+  marca?: string;
+  Categoria?: string;
+  categoria?: string;
+}
+
+// Helper function to normalize tipoProducto values
+function normalizeTipoProducto(value: string): TipoProducto {
+  const normalized = value.trim().toUpperCase();
+  if (normalized === 'CORE' || normalized === 'NO_CORE') {
+    return normalized as TipoProducto;
+  }
+  // Handle variations
+  if (normalized === 'NO-CORE' || normalized === 'NOCORE') {
+    return 'NO_CORE';
+  }
+  // Default to CORE if value doesn't match expected values
+  return 'CORE';
+}
+
+// Helper function to normalize presentacion values
+function normalizePresentacion(value: string): Presentacion {
+  const normalized = value.trim().toUpperCase();
+  if (normalized === 'VIDRIO' || normalized === 'PLANTA' || normalized === 'EMPAQUETADO') {
+    return normalized as Presentacion;
+  }
+  // Default to EMPAQUETADO if value doesn't match expected values
+  return 'EMPAQUETADO';
+}
+
+// Helper function to normalize unidadMedida values
+function normalizeUnidadMedida(value: string): UnidadMedida {
+  const normalized = value.trim().toUpperCase();
+  if (normalized === 'GR' || normalized === 'KG' || normalized === 'ML' || normalized === 'UNIDAD') {
+    return normalized as UnidadMedida;
+  }
+  // Default to UNIDAD if value doesn't match expected values
+  return 'UNIDAD';
+}
+
+// Helper function to normalize unidadDeVenta values
+function normalizeUnidadDeVenta(value: string): UnidadDeVenta {
+  const normalized = value.trim().toUpperCase();
+  if (normalized === 'PESO' || normalized === 'UNIDAD') {
+    return normalized as UnidadDeVenta;
+  }
+  // Default to UNIDAD if value doesn't match expected values
+  return 'UNIDAD';
+}
+
 export async function POST(req: NextRequest) {
   try {
-    // Check authorization
-    const session = await getServerSession();
-    if (!session || !session.user || session.user.role !== 'ADMIN') {
+    // Verify session
+    const session = await getServerSession(authOptions);
+    
+    if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'No autorizado para importar productos' },
+        { error: 'No autorizado' },
         { status: 401 }
       );
     }
 
-    // Parse multipart form data to get the Excel file
     const formData = await req.formData();
     const file = formData.get('file') as File;
-    
+
     if (!file) {
       return NextResponse.json(
-        { error: 'No se encontró un archivo para importar' },
+        { error: 'No se ha proporcionado ningún archivo' },
         { status: 400 }
       );
     }
 
-    // In a real implementation, we would use a library to parse the Excel/CSV file
-    // For this example, we'll simulate processing with dummy data
-    
-    // Process results tracking
+    // Initialize results object
     const results = {
       totalProducts: 0,
       newProducts: 0,
@@ -45,53 +115,39 @@ export async function POST(req: NextRequest) {
       errors: [] as { row: number; message: string }[]
     };
 
-    // Simulated data - in a real implementation, this would come from the uploaded file
-    const productsToImport = [
-      {
-        row: 2,
-        data: {
-          sku: 'PRD101',
-          nombre: 'Producto Importado 1',
-          precio: 199.99,
-          tipoProducto: 'CORE' as TipoProducto,
-          unidadDeVenta: 'UNIDAD' as UnidadDeVenta,
-          presentacion: 'EMPAQUETADO' as Presentacion,
-          unidadMedida: 'UNIDAD' as UnidadMedida,
-          contenido: null,
-          stock: 25,
-          margenCommission: 12.5,
-          marca: 'Nueva Marca',
-          categoria: 'Nueva Categoría'
-        }
-      },
-      {
-        row: 3,
-        data: {
-          sku: 'PRD102',
-          nombre: 'Producto Importado 2',
-          precio: 49.99,
-          tipoProducto: 'NO_CORE' as TipoProducto,
-          unidadDeVenta: 'PESO' as UnidadDeVenta,
-          presentacion: 'VIDRIO' as Presentacion,
-          unidadMedida: 'GR' as UnidadMedida,
-          contenido: 500,
-          stock: 50,
-          margenCommission: 8,
-          marca: 'Marca Existente',
-          categoria: 'Categoría Existente'
-        }
-      }
-    ];
+    // Read file buffer
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet) as ProductImportData[];
 
-    results.totalProducts = productsToImport.length;
+    results.totalProducts = data.length;
 
     // Process each product
-    for (const product of productsToImport) {
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
       try {
+        // Normalize data (handle both uppercase and lowercase keys)
+        const productData = {
+          sku: row.SKU || row.sku || '',
+          nombre: row.Nombre || row.nombre || '',
+          precio: Number(row.Precio || row.precio || 0),
+          tipoProducto: normalizeTipoProducto(String(row.TipoProducto || row.tipoProducto || 'CORE')),
+          unidadDeVenta: normalizeUnidadDeVenta(String(row.UnidadDeVenta || row.unidadDeVenta || 'UNIDAD')),
+          presentacion: normalizePresentacion(String(row.Presentacion || row.presentacion || 'EMPAQUETADO')),
+          unidadMedida: normalizeUnidadMedida(String(row.UnidadMedida || row.unidadMedida || 'UNIDAD')),
+          contenido: Number(row.Contenido || row.contenido || 0),
+          stock: Number(row.Stock || row.stock || 0),
+          margenCommission: Number(row.MargenCommission || row.margenCommission || 0),
+          marca: row.Marca || row.marca || '',
+          categoria: row.Categoria || row.categoria || ''
+        };
+
         // Validate product data
-        if (!product.data.sku || !product.data.nombre || !product.data.precio) {
+        if (!productData.sku || !productData.nombre || productData.precio <= 0) {
           results.errors.push({
-            row: product.row,
+            row: i + 2, // +2 because Excel rows start at 1 and we have a header row
             message: 'Faltan datos obligatorios (SKU, Nombre o Precio)'
           });
           continue;
@@ -99,43 +155,43 @@ export async function POST(req: NextRequest) {
 
         // Find or create marca (brand)
         let marca = await prisma.marca.findFirst({
-          where: { nombre: product.data.marca }
+          where: { nombre: productData.marca }
         });
 
         if (!marca) {
           marca = await prisma.marca.create({
-            data: { nombre: product.data.marca }
+            data: { nombre: productData.marca }
           });
           results.newBrands++;
         }
 
         // Find or create categoria (category)
         let categoria = await prisma.categoria.findFirst({
-          where: { nombre: product.data.categoria }
+          where: { nombre: productData.categoria }
         });
 
         if (!categoria) {
           categoria = await prisma.categoria.create({
-            data: { nombre: product.data.categoria }
+            data: { nombre: productData.categoria }
           });
           results.newCategories++;
         }
 
         // Check if product already exists
         const existingProduct = await prisma.producto.findUnique({
-          where: { sku: product.data.sku }
+          where: { sku: productData.sku }
         });
 
-        const productData = {
-          nombre: product.data.nombre,
-          precio: product.data.precio,
-          tipoProducto: product.data.tipoProducto,
-          unidadDeVenta: product.data.unidadDeVenta,
-          presentacion: product.data.presentacion,
-          unidadMedida: product.data.unidadMedida,
-          contenido: product.data.contenido,
-          stock: product.data.stock,
-          margenCommission: product.data.margenCommission,
+        const productToSave = {
+          nombre: productData.nombre,
+          precio: productData.precio,
+          tipoProducto: productData.tipoProducto,
+          unidadDeVenta: productData.unidadDeVenta,
+          presentacion: productData.presentacion,
+          unidadMedida: productData.unidadMedida,
+          contenido: productData.contenido,
+          stock: productData.stock,
+          margenCommission: productData.margenCommission,
           categoriaId: categoria.id,
           marcaId: marca.id
         };
@@ -144,24 +200,24 @@ export async function POST(req: NextRequest) {
           // Update existing product
           await prisma.producto.update({
             where: { id: existingProduct.id },
-            data: productData
+            data: productToSave
           });
           results.updatedProducts++;
         } else {
           // Create new product
           await prisma.producto.create({
             data: {
-              sku: product.data.sku,
-              ...productData,
+              sku: productData.sku,
+              ...productToSave,
               createdById: session.user.id
             }
           });
           results.newProducts++;
         }
       } catch (error) {
-        console.error(`Error processing row ${product.row}:`, error);
+        console.error(`Error processing row ${i + 2}:`, error);
         results.errors.push({
-          row: product.row,
+          row: i + 2,
           message: `Error en el procesamiento: ${(error as Error).message}`
         });
       }
@@ -178,8 +234,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { 
         success: false,
-        message: 'Error en el proceso de importación',
-        error: (error as Error).message 
+        error: 'Error durante la importación',
+        details: (error as Error).message
       },
       { status: 500 }
     );
