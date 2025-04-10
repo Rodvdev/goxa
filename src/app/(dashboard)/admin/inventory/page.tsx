@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Filter, AlertCircle, TrendingUp, Users, Package, DollarSign, BarChart2 } from 'lucide-react';
+import { Plus, Search, Filter, AlertCircle, TrendingUp, Users, Package, DollarSign } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
