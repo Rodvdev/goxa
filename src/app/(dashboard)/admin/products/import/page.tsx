@@ -254,25 +254,30 @@ export default function ImportProductsPage() {
             </div>
 
             <div className="mb-6 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <input
-                type="file"
-                id="productFile"
-                accept=".xlsx,.xls,.csv"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              <label
-                htmlFor="productFile"
-                className="cursor-pointer flex flex-col items-center justify-center"
-              >
+              <div className="flex flex-col items-center justify-center">
                 <Upload className="h-10 w-10 text-blue-500 mb-2" />
-                <span className="text-gray-700 font-medium">
-                  {file ? file.name : 'Selecciona o arrastra tu archivo Excel aquí'}
+                <span className="text-gray-700 font-medium mb-4">
+                  {file ? `Archivo seleccionado: ${file.name}` : 'Selecciona tu archivo Excel o CSV'}
                 </span>
-                <span className="text-gray-500 text-sm mt-1">
+                
+                {/* Input de archivo visible y estilizado */}
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={handleFileChange}
+                  className="block w-full max-w-xs text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-600 file:text-white
+                    hover:file:bg-blue-700
+                    cursor-pointer"
+                />
+                
+                <span className="text-gray-500 text-sm mt-2">
                   Archivos soportados: .xlsx, .xls, .csv
                 </span>
-              </label>
+              </div>
             </div>
 
             {error && (
