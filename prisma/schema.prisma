@@ -54,8 +54,10 @@ model Producto {
   margenCommission   Float            // porcentaje de comisión para vendedores
   categoriaId        Int
   marcaId            Int
+  createdById        String?
   categoria          Categoria        @relation(fields: [categoriaId], references: [id])
   marca              Marca            @relation(fields: [marcaId], references: [id])
+  createdBy          User?            @relation("CreatedBy", fields: [createdById], references: [id])
   packProductos      PackProducto[]
   ventas             Venta[]
 }
@@ -134,13 +136,18 @@ model Session {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String    @unique
   emailVerified DateTime?
   password      String?
   image         String?
-  role          Role      @default(USER)
+  role          String    @default("USER")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
   accounts      Account[]
   sessions      Session[]
+  products      Producto[]   @relation("CreatedBy")
 }
 
 model VerificationToken {
