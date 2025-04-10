@@ -27,6 +27,8 @@ export default function NewProductPage() {
     precio: '',
     tipoProducto: 'CORE',
     unidadDeVenta: 'UNIDAD',
+    presentacion: '',
+    unidadMedida: 'UNIDAD',
     contenido: '',
     stock: '',
     imagen: '',
@@ -91,6 +93,7 @@ export default function NewProductPage() {
     }
     if (!formData.categoriaId) newErrors.categoriaId = 'Debe seleccionar una categoría';
     if (!formData.marcaId) newErrors.marcaId = 'Debe seleccionar una marca';
+    if (!formData.unidadMedida) newErrors.unidadMedida = 'Debe seleccionar una unidad de medida';
     
     if (formData.unidadDeVenta === 'PESO' && !formData.contenido) {
       newErrors.contenido = 'El contenido es obligatorio para productos vendidos por peso';
@@ -230,11 +233,50 @@ export default function NewProductPage() {
               </select>
             </div>
             
+            {/* Presentación */}
+            <div>
+              <label htmlFor="presentacion" className="block text-sm font-medium text-gray-700 mb-1">
+                Presentación
+              </label>
+              <select
+                id="presentacion"
+                name="presentacion"
+                value={formData.presentacion}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Seleccione una presentación</option>
+                <option value="VIDRIO">Vidrio</option>
+                <option value="PLANTA">Planta</option>
+                <option value="EMPAQUETADO">Empaquetado</option>
+              </select>
+            </div>
+            
+            {/* Unidad de Medida */}
+            <div>
+              <label htmlFor="unidadMedida" className="block text-sm font-medium text-gray-700 mb-1">
+                Unidad de Medida <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="unidadMedida"
+                name="unidadMedida"
+                value={formData.unidadMedida}
+                onChange={handleChange}
+                className={`w-full p-2 border rounded-md ${errors.unidadMedida ? 'border-red-500' : 'border-gray-300'}`}
+              >
+                <option value="GR">Gramos (gr)</option>
+                <option value="KG">Kilogramos (kg)</option>
+                <option value="ML">Mililitros (ml)</option>
+                <option value="UNIDAD">Unidad</option>
+              </select>
+              {errors.unidadMedida && <p className="mt-1 text-sm text-red-500">{errors.unidadMedida}</p>}
+            </div>
+            
             {/* Contenido (solo visible si la unidad de venta es por peso) */}
             {formData.unidadDeVenta === 'PESO' && (
               <div>
                 <label htmlFor="contenido" className="block text-sm font-medium text-gray-700 mb-1">
-                  Contenido (kg) <span className="text-red-500">*</span>
+                  Contenido ({formData.unidadMedida === 'KG' ? 'kg' : formData.unidadMedida === 'GR' ? 'gr' : 'ml'}) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"

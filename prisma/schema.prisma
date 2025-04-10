@@ -26,6 +26,21 @@ enum UnidadDeVenta {
   UNIDAD
 }
 
+// ENUM para la presentación del producto
+enum Presentacion {
+  VIDRIO
+  PLANTA
+  EMPAQUETADO
+}
+
+// ENUM para la unidad de medida del producto
+enum UnidadMedida {
+  GR
+  KG
+  ML
+  UNIDAD
+}
+
 // Modelo para las Marcas
 model Marca {
   id         Int         @id @default(autoincrement())
@@ -48,6 +63,8 @@ model Producto {
   precio             Float
   tipoProducto       TipoProducto
   unidadDeVenta      UnidadDeVenta
+  presentacion       Presentacion?    // Vidrio, Planta o Empaquetado
+  unidadMedida       UnidadMedida     // gr, kg, ml, unidad
   contenido          Float?           // p.ej. peso en Kg o la medida correspondiente
   stock              Int
   imagen             String?          // URL o path de la imagen del producto

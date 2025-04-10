@@ -42,6 +42,60 @@ export default function AdminDashboard() {
         </div>
       </div>
       
+      {/* Quick Actions Section */}
+      <div className="mt-8">
+        <h2 className="text-lg font-medium mb-4">Acciones Rápidas</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <a href="/admin/products/new" className="bg-white rounded-lg shadow p-4 flex items-center hover:bg-blue-50 transition-colors">
+            <div className="bg-blue-100 p-3 rounded-full mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-medium">Nuevo Producto</h3>
+              <p className="text-sm text-gray-500">Crear producto</p>
+            </div>
+          </a>
+          
+          <a href="/admin/products/import" className="bg-white rounded-lg shadow p-4 flex items-center hover:bg-green-50 transition-colors">
+            <div className="bg-green-100 p-3 rounded-full mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-medium">Importar Productos</h3>
+              <p className="text-sm text-gray-500">Desde Excel/CSV</p>
+            </div>
+          </a>
+          
+          <a href="/admin/sales/new" className="bg-white rounded-lg shadow p-4 flex items-center hover:bg-purple-50 transition-colors">
+            <div className="bg-purple-100 p-3 rounded-full mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-medium">Nueva Venta</h3>
+              <p className="text-sm text-gray-500">Registrar venta</p>
+            </div>
+          </a>
+          
+          <a href="/admin/reports" className="bg-white rounded-lg shadow p-4 flex items-center hover:bg-yellow-50 transition-colors">
+            <div className="bg-yellow-100 p-3 rounded-full mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-medium">Reportes</h3>
+              <p className="text-sm text-gray-500">Ver informes</p>
+            </div>
+          </a>
+        </div>
+      </div>
+      
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Sales */}
         <div className="bg-white rounded-lg shadow p-6">
