@@ -20,7 +20,7 @@ export async function GET() {
     // Get total sales
     const totalSales = await prisma.venta.aggregate({
       _sum: {
-        total: true
+        precioTotal: true
       }
     });
 
@@ -28,16 +28,20 @@ export async function GET() {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
-    const newCustomers = await prisma.usuario.count({
+    const newCustomers = await prisma.user.count({
       where: {
         createdAt: {
           gte: thirtyDaysAgo
-        }
+        },
+        role: 'USER' // Only count regular users, not admins or other roles
       }
     });
 
-    // Get total products in stock
-    const productsInStock = await prisma.producto.aggregate({
+    // Get total number of products (not total units in stock)
+    const totalProducts = await prisma.producto.count();
+
+    // Get total units in stock
+    const totalUnitsInStock = await prisma.producto.aggregate({
       _sum: {
         stock: true
       }
@@ -47,7 +51,7 @@ export async function GET() {
     const opportunities = await prisma.producto.count({
       where: {
         stock: {
-          lt: 5 // Products with less than 5 units in stock
+          lt: 5
         }
       }
     });
@@ -56,21 +60,17 @@ export async function GET() {
     const recentSales = await prisma.venta.findMany({
       take: 5,
       orderBy: {
-        createdAt: 'desc'
+        fecha: 'desc'
       },
       include: {
-        usuario: {
+        vendedor: {
           select: {
             nombre: true
           }
         },
-        detalleVenta: {
-          include: {
-            producto: {
-              select: {
-                nombre: true
-              }
-            }
+        producto: {
+          select: {
+            nombre: true
           }
         }
       }
@@ -86,27 +86,38 @@ export async function GET() {
       take: 5,
       orderBy: {
         stock: 'asc'
+      },
+      select: {
+        nombre: true,
+        stock: true,
+        categoria: {
+          select: {
+            nombre: true
+          }
+        }
       }
     });
 
     return NextResponse.json({
       stats: {
-        totalSales: totalSales._sum.total || 0,
+        totalSales: totalSales._sum?.precioTotal || 0,
         newCustomers,
-        productsInStock: productsInStock._sum.stock || 0,
+        productsInStock: totalProducts,
+        totalUnitsInStock: totalUnitsInStock._sum?.stock || 0,
         opportunities
       },
       recentSales: recentSales.map(sale => ({
-        customer: sale.usuario.nombre,
-        product: sale.detalleVenta[0]?.producto.nombre || 'N/A',
-        status: sale.estado,
-        total: sale.total
+        customer: sale.vendedor?.nombre || 'N/A',
+        product: sale.producto?.nombre || 'N/A',
+        status: 'COMPLETADA',
+        total: sale.precioTotal
       })),
       lowStockItems: lowStockItems.map(item => ({
         name: item.nombre,
         currentStock: item.stock,
         minimumStock: 5,
-        status: item.stock < 2 ? 'Crítico' : 'Bajo'
+        status: item.stock < 2 ? 'Crítico' : 'Bajo',
+        category: item.categoria.nombre
       }))
     });
     

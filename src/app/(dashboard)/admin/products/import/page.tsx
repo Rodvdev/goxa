@@ -31,7 +31,7 @@ interface ImportResult {
 }
 
 interface ParsedData {
-  SKU: string;
+  SKU?: string;
   Nombre: string;
   Precio: string;
   TipoProducto: string;
@@ -43,6 +43,19 @@ interface ParsedData {
   MargenCommission: string;
   Marca: string;
   Categoria: string;
+}
+
+// Function to generate SKU preview
+function generateSKUPreview(row: ParsedData): string {
+  const category = row.Categoria?.slice(0, 3).toUpperCase() || 'CAT';
+  const brand = row.Marca?.slice(0, 3).toUpperCase() || 'BRD';
+  const name = row.Nombre?.slice(0, 3).toUpperCase() || 'PRD';
+  const content = row.Contenido?.toString().padStart(3, '0') || '000';
+  const unit = row.UnidadMedida?.slice(0, 3).toUpperCase() || 'UNI';
+  const presentation = row.Presentacion?.slice(0, 3).toUpperCase() || 'PRE';
+  const type = row.TipoProducto?.toUpperCase() === 'NO_CORE' ? 'NC' : 'CO';
+
+  return `${category}-${brand}-${name}-${content}-${unit}-${presentation}-${type}`;
 }
 
 export default function ImportProductsPage() {
@@ -101,12 +114,12 @@ export default function ImportProductsPage() {
       if (data && data.length > 0) {
         // Tomamos solo las primeras 100 filas para la vista previa
         const preview = data.slice(0, 100).map(row => ({
-          sku: row.SKU || '',
+          sku: row.SKU || generateSKUPreview(row),
           nombre: row.Nombre || '',
-          precio: row.Precio || '',
-          tipoProducto: row.TipoProducto || '',
-          unidadDeVenta: row.UnidadDeVenta || '',
-          stock: row.Stock || '',
+          precio: row.Precio || '0',
+          tipoProducto: row.TipoProducto || 'CORE',
+          unidadDeVenta: row.UnidadDeVenta || 'UNIDAD',
+          stock: row.Stock || '0',
           marca: row.Marca || '',
           categoria: row.Categoria || ''
         }));
@@ -342,7 +355,7 @@ export default function ImportProductsPage() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {previewData.map((product, index) => (
                         <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{product.sku}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-mono">{product.sku}</td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{product.nombre}</td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">${product.precio}</td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{product.tipoProducto}</td>

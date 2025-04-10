@@ -12,6 +12,20 @@ type UnidadDeVenta = 'PESO' | 'UNIDAD';
 type Presentacion = 'VIDRIO' | 'PLANTA' | 'EMPAQUETADO';
 type UnidadMedida = 'GR' | 'KG' | 'ML' | 'UNIDAD';
 
+// Function to generate SKU
+function generateSKU(product: ProductImportData): string {
+  const category = product.Categoria?.slice(0, 3).toUpperCase() || 'CAT';
+  const brand = product.Marca?.slice(0, 3).toUpperCase() || 'BRD';
+  const presentation = product.Presentacion?.slice(0, 3).toUpperCase() || 'PRS';
+  const type = product.TipoProducto?.toUpperCase() === 'NO_CORE' ? 'NC' : (product.TipoProducto?.toUpperCase() === 'CORE' ? 'COR' : (product.TipoProducto?.slice(0, 3).toUpperCase() || 'TYP'));
+  const name = product.Nombre?.slice(0, 3).toUpperCase() || 'PRD';
+  
+  // Generate a random number between 1000 and 9999
+  const randomNum = Math.floor(Math.random() * 9000) + 1000;
+  
+  return `${category}-${brand}-${presentation}-${type}-${name}-${randomNum}`;
+}
+
 interface ProductImportData {
   SKU?: string;
   sku?: string;
@@ -128,9 +142,12 @@ export async function POST(req: NextRequest) {
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       try {
+        // Generate SKU if not provided
+        const sku = row.SKU || row.sku || generateSKU(row);
+
         // Normalize data (handle both uppercase and lowercase keys)
         const productData = {
-          sku: row.SKU || row.sku || '',
+          sku: sku,
           nombre: row.Nombre || row.nombre || '',
           precio: Number(row.Precio || row.precio || 0),
           tipoProducto: normalizeTipoProducto(String(row.TipoProducto || row.tipoProducto || 'CORE')),
@@ -145,10 +162,10 @@ export async function POST(req: NextRequest) {
         };
 
         // Validate product data
-        if (!productData.sku || !productData.nombre || productData.precio <= 0) {
+        if (!productData.nombre || productData.precio <= 0) {
           results.errors.push({
             row: i + 2, // +2 because Excel rows start at 1 and we have a header row
-            message: 'Faltan datos obligatorios (SKU, Nombre o Precio)'
+            message: 'Faltan datos obligatorios (Nombre o Precio)'
           });
           continue;
         }
@@ -197,10 +214,13 @@ export async function POST(req: NextRequest) {
         };
 
         if (existingProduct) {
-          // Update existing product
+          // Update existing product and add stock
           await prisma.producto.update({
             where: { id: existingProduct.id },
-            data: productToSave
+            data: {
+              ...productToSave,
+              stock: existingProduct.stock + productData.stock
+            }
           });
           results.updatedProducts++;
         } else {
