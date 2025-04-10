@@ -1,22 +1,12 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { ApolloWrapper } from "@/components/providers/apollo-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
 });
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "GOXA - Plataforma ERP, E-commerce y CRM",
-  description: "Plataforma integral para la gestión empresarial, comercio electrónico y relación con clientes",
-};
 
 export default function RootLayout({
   children,
@@ -25,10 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Providers>{children}</Providers>
+      <body className={`${inter.variable} antialiased`}>
+        <ApolloWrapper>
+          <Providers>{children}</Providers>
+        </ApolloWrapper>
       </body>
     </html>
   );

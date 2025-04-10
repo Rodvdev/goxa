@@ -4,6 +4,12 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 
 function SignInContent() {
   const router = useRouter();
@@ -44,7 +50,26 @@ function SignInContent() {
         return;
       }
 
-      // Redirect to dashboard
+      // Set auth token cookie
+      const response = await fetch('/api/auth/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener el token de autenticación');
+      }
+
+      const { token } = await response.json();
+      
+      // Set the cookie
+      document.cookie = `auth-token=${token}; path=/; max-age=86400; secure; samesite=strict`;
+
       router.push("/admin");
     } catch (err: unknown) {
       console.error("Login error:", err);
@@ -55,98 +80,90 @@ function SignInContent() {
   };
 
   return (
-    <div>
-      <h2 className="mt-6 text-center text-2xl font-bold leading-9 text-gray-900">
-        Iniciar sesión en su cuenta
-      </h2>
-      
-      {registered && (
-        <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-          Registro exitoso. Ahora puede iniciar sesión con sus credenciales.
-        </div>
-      )}
-      
-      {error && (
-        <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error}
-        </div>
-      )}
-      
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-            Correo electrónico
-          </label>
-          <div className="mt-2">
-            <input
+    <Card className="w-full">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold text-center">Iniciar sesión</CardTitle>
+        <CardDescription className="text-center">
+          Ingresa tus credenciales para acceder a tu cuenta
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {registered && (
+          <Alert className="bg-green-50 border-green-200">
+            <AlertDescription className="text-green-800">
+              Registro exitoso. Ahora puede iniciar sesión con sus credenciales.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <Label htmlFor="email">Correo electrónico</Label>
+            <Input
               id="email"
               name="email"
               type="email"
-              autoComplete="email"
-              required
+              placeholder="ejemplo@correo.com"
               value={formData.email}
               onChange={handleChange}
-              className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
+              required
             />
           </div>
-        </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-            Contraseña
-          </label>
-          <div className="mt-2">
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="password">Contraseña</Label>
+            <Input
               id="password"
               name="password"
               type="password"
-              autoComplete="current-password"
-              required
               value={formData.password}
               onChange={handleChange}
-              className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
+              required
             />
           </div>
-        </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-            />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-              Recordarme
-            </label>
-          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="remember-me" />
+              <Label htmlFor="remember-me" className="text-sm">
+                Recordarme
+              </Label>
+            </div>
 
-          <div className="text-sm">
-            <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link 
+              href="/forgot-password" 
+              className="text-sm text-indigo-600 hover:text-indigo-500"
+            >
               ¿Olvidó su contraseña?
             </Link>
           </div>
-        </div>
 
-        <div>
-          <button
-            type="submit"
+          <Button 
+            type="submit" 
+            className="w-full" 
             disabled={loading}
-            className="flex w-full justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-70"
           >
             {loading ? "Iniciando sesión..." : "Iniciar sesión"}
-          </button>
-        </div>
-      </form>
+          </Button>
+        </form>
 
-      <p className="mt-10 text-center text-sm text-gray-500">
-        ¿No tiene una cuenta?{" "}
-        <Link href="/signup" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
-          Regístrese
-        </Link>
-      </p>
-    </div>
+        <div className="text-center text-sm">
+          ¿No tiene una cuenta?{" "}
+          <Link 
+            href="/signup" 
+            className="font-medium text-indigo-600 hover:text-indigo-500"
+          >
+            Regístrese
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

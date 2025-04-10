@@ -3,6 +3,30 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Upload, ShoppingCart, BarChart2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from '@apollo/client';
+import { gql } from '@apollo/client';
+
+const GET_DASHBOARD_DATA = gql`
+  query GetDashboardData {
+    totalProducts
+    recentSales {
+      customer
+      product
+      status
+      total
+    }
+    lowStockItems {
+      name
+      currentStock
+      minimumStock
+      status
+    }
+  }
+`;
 
 interface DashboardStats {
   totalSales: number;
@@ -26,38 +50,147 @@ interface LowStockItem {
 }
 
 export default function AdminDashboard() {
+  const { loading, error, data } = useQuery(GET_DASHBOARD_DATA);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentSales, setRecentSales] = useState<RecentSale[]>([]);
   const [lowStockItems, setLowStockItems] = useState<LowStockItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const response = await fetch('/api/admin/stats');
-        if (!response.ok) {
-          throw new Error('Error al cargar los datos del dashboard');
-        }
-        const data = await response.json();
-        setStats(data.stats);
-        setRecentSales(data.recentSales);
-        setLowStockItems(data.lowStockItems);
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err);
-        setError('Error al cargar los datos del dashboard');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
+    if (data) {
+      setStats({
+        totalSales: 0, // TODO: Implementar con resolver
+        newCustomers: 0, // TODO: Implementar con resolver
+        productsInStock: data.totalProducts,
+        opportunities: 0, // TODO: Implementar con resolver
+      });
+      setRecentSales(data.recentSales);
+      setLowStockItems(data.lowStockItems);
+    }
+  }, [data]);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Panel de Administración</h1>
+          <Button variant="outline" disabled>
+            Configuración
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
+              <BarChart2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+              <p className="text-xs text-muted-foreground">
+                +12% desde el mes pasado
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Clientes Nuevos</CardTitle>
+              <Plus className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+              <p className="text-xs text-muted-foreground">
+                +8% desde el mes pasado
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Productos en Stock</CardTitle>
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+              <p className="text-xs text-muted-foreground">
+                -3% desde el mes pasado
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Oportunidades</CardTitle>
+              <BarChart2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+              <p className="text-xs text-muted-foreground">
+                +18% desde el mes pasado
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ventas Recientes</CardTitle>
+              <CardDescription>Últimas transacciones realizadas</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead>Producto</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...Array(5)].map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div></TableCell>
+                      <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div></TableCell>
+                      <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div></TableCell>
+                      <TableCell className="text-right"><div className="h-4 w-24 bg-gray-200 rounded animate-pulse ml-auto"></div></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Productos con Stock Bajo</CardTitle>
+              <CardDescription>Productos que necesitan reabastecimiento</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Producto</TableHead>
+                    <TableHead>Stock Actual</TableHead>
+                    <TableHead>Stock Mínimo</TableHead>
+                    <TableHead>Estado</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...Array(5)].map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div></TableCell>
+                      <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div></TableCell>
+                      <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div></TableCell>
+                      <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -65,166 +198,170 @@ export default function AdminDashboard() {
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="text-red-500">{error}</div>
+        <div className="text-red-500">{error.message}</div>
       </div>
     );
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Panel de Administración</h1>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Panel de Administración</h1>
+        <Button variant="outline" asChild>
+          <Link href="/admin/settings">Configuración</Link>
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Stats Cards */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-gray-500 text-sm font-medium">Ventas Totales</h2>
-          <p className="text-3xl font-bold mt-2">S/ {stats?.totalSales.toFixed(2)}</p>
-          <div className="flex items-center text-green-500 text-sm mt-2">
-            <span>↑ 12%</span>
-            <span className="text-gray-400 ml-1">desde el mes pasado</span>
-          </div>
-        </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
+            <BarChart2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">S/ {stats?.totalSales.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">
+              +12% desde el mes pasado
+            </p>
+          </CardContent>
+        </Card>
         
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-gray-500 text-sm font-medium">Clientes Nuevos</h2>
-          <p className="text-3xl font-bold mt-2">{stats?.newCustomers}</p>
-          <div className="flex items-center text-green-500 text-sm mt-2">
-            <span>↑ 8%</span>
-            <span className="text-gray-400 ml-1">desde el mes pasado</span>
-          </div>
-        </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Clientes Nuevos</CardTitle>
+            <Plus className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.newCustomers}</div>
+            <p className="text-xs text-muted-foreground">
+              +8% desde el mes pasado
+            </p>
+          </CardContent>
+        </Card>
         
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-gray-500 text-sm font-medium">Productos en Stock</h2>
-          <p className="text-3xl font-bold mt-2">{stats?.productsInStock}</p>
-          <div className="flex items-center text-red-500 text-sm mt-2">
-            <span>↓ 3%</span>
-            <span className="text-gray-400 ml-1">desde el mes pasado</span>
-          </div>
-        </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Productos en Stock</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.productsInStock}</div>
+            <p className="text-xs text-muted-foreground">
+              -3% desde el mes pasado
+            </p>
+          </CardContent>
+        </Card>
         
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-gray-500 text-sm font-medium">Oportunidades</h2>
-          <p className="text-3xl font-bold mt-2">{stats?.opportunities}</p>
-          <div className="flex items-center text-green-500 text-sm mt-2">
-            <span>↑ 18%</span>
-            <span className="text-gray-400 ml-1">desde el mes pasado</span>
-          </div>
-        </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Oportunidades</CardTitle>
+            <BarChart2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.opportunities}</div>
+            <p className="text-xs text-muted-foreground">
+              +18% desde el mes pasado
+            </p>
+          </CardContent>
+        </Card>
       </div>
       
-      {/* Quick Actions Section */}
-      <div className="mt-8">
-        <h2 className="text-lg font-medium mb-4">Acciones Rápidas</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link href="/admin/products/new" className="bg-white rounded-lg shadow p-4 flex items-center hover:bg-blue-50 transition-colors">
-            <div className="bg-blue-100 p-3 rounded-full mr-4">
-              <Plus className="h-6 w-6 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="font-medium">Nuevo Producto</h3>
-              <p className="text-sm text-gray-500">Crear producto</p>
-            </div>
-          </Link>
-          
-          <Link href="/admin/products/import" className="bg-white rounded-lg shadow p-4 flex items-center hover:bg-green-50 transition-colors">
-            <div className="bg-green-100 p-3 rounded-full mr-4">
-              <Upload className="h-6 w-6 text-green-600" />
-            </div>
-            <div>
-              <h3 className="font-medium">Importar Productos</h3>
-              <p className="text-sm text-gray-500">Desde Excel/CSV</p>
-            </div>
-          </Link>
-          
-          <Link href="/admin/sales/new" className="bg-white rounded-lg shadow p-4 flex items-center hover:bg-purple-50 transition-colors">
-            <div className="bg-purple-100 p-3 rounded-full mr-4">
-              <ShoppingCart className="h-6 w-6 text-purple-600" />
-            </div>
-            <div>
-              <h3 className="font-medium">Nueva Venta</h3>
-              <p className="text-sm text-gray-500">Registrar venta</p>
-            </div>
-          </Link>
-          
-          <Link href="/admin/reports" className="bg-white rounded-lg shadow p-4 flex items-center hover:bg-yellow-50 transition-colors">
-            <div className="bg-yellow-100 p-3 rounded-full mr-4">
-              <BarChart2 className="h-6 w-6 text-yellow-600" />
-            </div>
-            <div>
-              <h3 className="font-medium">Reportes</h3>
-              <p className="text-sm text-gray-500">Ver informes</p>
-            </div>
-          </Link>
-        </div>
-      </div>
-      
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Sales */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium mb-4">Ventas Recientes</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Ventas Recientes</CardTitle>
+            <CardDescription>Últimas transacciones realizadas</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Producto</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {recentSales.map((sale, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-3 whitespace-nowrap">{sale.customer}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">{sale.product}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        sale.status === 'COMPLETADA' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                  <TableRow key={index}>
+                    <TableCell>{sale.customer}</TableCell>
+                    <TableCell>{sale.product}</TableCell>
+                    <TableCell>
+                      <Badge variant={sale.status === 'COMPLETADA' ? 'default' : 'secondary'}>
                         {sale.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">S/ {sale.total.toFixed(2)}</td>
-                  </tr>
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">S/ {sale.total.toFixed(2)}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
         
-        {/* Low Stock Items */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium mb-4">Productos con Stock Bajo</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Actual</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Mínimo</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+        <Card>
+          <CardHeader>
+            <CardTitle>Productos con Stock Bajo</CardTitle>
+            <CardDescription>Productos que necesitan reabastecimiento</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Producto</TableHead>
+                  <TableHead>Stock Actual</TableHead>
+                  <TableHead>Stock Mínimo</TableHead>
+                  <TableHead>Estado</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {lowStockItems.map((item, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-3 whitespace-nowrap">{item.name}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">{item.currentStock}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">{item.minimumStock}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        item.status === 'Crítico' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                  <TableRow key={index}>
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>{item.currentStock}</TableCell>
+                    <TableCell>{item.minimumStock}</TableCell>
+                    <TableCell>
+                      <Badge variant={item.status === 'Crítico' ? 'destructive' : 'secondary'}>
                         {item.status}
-                      </span>
-                    </td>
-                  </tr>
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Button variant="outline" className="h-auto p-4" asChild>
+          <Link href="/admin/products/new" className="flex items-center space-x-2">
+            <Plus className="h-4 w-4" />
+            <span>Nuevo Producto</span>
+          </Link>
+        </Button>
+        
+        <Button variant="outline" className="h-auto p-4" asChild>
+          <Link href="/admin/products/import" className="flex items-center space-x-2">
+            <Upload className="h-4 w-4" />
+            <span>Importar Productos</span>
+          </Link>
+        </Button>
+        
+        <Button variant="outline" className="h-auto p-4" asChild>
+          <Link href="/admin/sales/new" className="flex items-center space-x-2">
+            <ShoppingCart className="h-4 w-4" />
+            <span>Nueva Venta</span>
+          </Link>
+        </Button>
+        
+        <Button variant="outline" className="h-auto p-4" asChild>
+          <Link href="/admin/reports" className="flex items-center space-x-2">
+            <BarChart2 className="h-4 w-4" />
+            <span>Reportes</span>
+          </Link>
+        </Button>
       </div>
     </div>
   );

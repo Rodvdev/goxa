@@ -2,8 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Pencil, Trash2, Search, Filter, Upload, AlertCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Filter, Upload, AlertCircle, MoreVertical } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Table, TableHeader, TableBody, TableCell, TableHead, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 interface Product {
   id: number;
@@ -73,8 +82,76 @@ export default function ProductsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Productos</h1>
+          <div className="flex space-x-2">
+            <Button variant="outline" disabled>
+              <Upload className="w-4 h-4 mr-2" />
+              Importar
+            </Button>
+            <Button variant="outline" disabled>
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Producto
+            </Button>
+          </div>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+              <div className="relative flex-1 max-w-md">
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Skeleton className="h-10 w-32" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="relative overflow-x-auto">
+              <div className="min-w-[970px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b">
+                      <TableHead className="w-[70px] px-0.5 py-1">Nombre</TableHead>
+                      <TableHead className="w-[40px] px-0.5 py-1">Precio</TableHead>
+                      <TableHead className="w-[40px] px-0.5 py-1">Tipo</TableHead>
+                      <TableHead className="w-[40px] px-0.5 py-1">Unidad</TableHead>
+                      <TableHead className="w-[60px] px-0.5 py-1">Presentación</TableHead>
+                      <TableHead className="w-[40px] px-0.5 py-1">U. Medida</TableHead>
+                      <TableHead className="w-[25px] px-0.5 py-1">Stock</TableHead>
+                      <TableHead className="w-[50px] px-0.5 py-1">Marca</TableHead>
+                      <TableHead className="w-[50px] px-0.5 py-1">Categoría</TableHead>
+                      <TableHead className="w-[25px] px-0.5 py-1">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[...Array(5)].map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="px-0.5 py-1"><Skeleton className="h-4 w-[50px]" /></TableCell>
+                        <TableCell className="px-0.5 py-1"><Skeleton className="h-4 w-[25px]" /></TableCell>
+                        <TableCell className="px-0.5 py-1"><Skeleton className="h-4 w-[25px]" /></TableCell>
+                        <TableCell className="px-0.5 py-1"><Skeleton className="h-4 w-[25px]" /></TableCell>
+                        <TableCell className="px-0.5 py-1"><Skeleton className="h-4 w-[40px]" /></TableCell>
+                        <TableCell className="px-0.5 py-1"><Skeleton className="h-4 w-[25px]" /></TableCell>
+                        <TableCell className="px-0.5 py-1"><Skeleton className="h-4 w-[15px]" /></TableCell>
+                        <TableCell className="px-0.5 py-1"><Skeleton className="h-4 w-[30px]" /></TableCell>
+                        <TableCell className="px-0.5 py-1"><Skeleton className="h-4 w-[30px]" /></TableCell>
+                        <TableCell className="px-0.5 py-1">
+                          <div className="flex space-x-0.5">
+                            <Skeleton className="h-4 w-2" />
+                            <Skeleton className="h-4 w-2" />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -91,25 +168,47 @@ export default function ProductsPage() {
     );
   }
 
+  const handleDelete = async (productId: number) => {
+    try {
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar el producto');
+      }
+
+      toast.success('Producto eliminado correctamente');
+      // Refresh the products list
+      const productsResponse = await fetch('/api/admin/products', {
+        credentials: 'include'
+      });
+      const data = await productsResponse.json();
+      setProducts(data.products);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error('Error al eliminar el producto');
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Productos</h1>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Productos</h1>
         <div className="flex space-x-2">
-          <Link
-            href="/admin/products/import"
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center"
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            Importar
-          </Link>
-          <Link
-            href="/admin/products/new"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Producto
-          </Link>
+          <Button variant="outline" asChild>
+            <Link href="/admin/products/import">
+              <Upload className="w-4 h-4 mr-2" />
+              Importar
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/admin/products/new">
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Producto
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -119,140 +218,126 @@ export default function ProductsPage() {
         </div>
       )}
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="p-4 border-b">
+      <Card>
+        <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-            {/* Search */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
+              <Input
                 type="text"
                 placeholder="Buscar por SKU, nombre, marca o categoría..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="pl-10"
               />
             </div>
-
-            {/* Filter */}
             <div className="flex items-center space-x-2">
               <Filter className="text-gray-400 w-5 h-5" />
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value as 'ALL' | 'CORE' | 'NO_CORE')}
-                className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="ALL">Todos</option>
-                <option value="CORE">Core</option>
-                <option value="NO_CORE">No Core</option>
-              </select>
+              <Select value={filter} onValueChange={(value) => setFilter(value as 'ALL' | 'CORE' | 'NO_CORE')}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filtrar por tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Todos</SelectItem>
+                  <SelectItem value="CORE">Core</SelectItem>
+                  <SelectItem value="NO_CORE">No Core</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unidad</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presentación</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">U. Medida</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marca</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.length === 0 ? (
-                <tr>
-                  <td colSpan={11} className="px-6 py-4 text-center text-gray-500">
-                    No se encontraron productos
-                  </td>
-                </tr>
-              ) : (
-                filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.sku}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.nombre}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {`S/ ${product.precio.toFixed(2)}`}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.tipoProducto === 'CORE' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {product.tipoProducto}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.unidadDeVenta === 'PESO' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
-                      }`}>
-                        {product.unidadDeVenta}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {product.presentacion ? (
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          product.presentacion === 'VIDRIO' ? 'bg-purple-100 text-purple-800' : 
-                          product.presentacion === 'PLANTA' ? 'bg-green-100 text-green-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {product.presentacion}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                        {product.unidadMedida}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.stock < 5 ? 'bg-red-100 text-red-800' : 
-                        product.stock < 20 ? 'bg-yellow-100 text-yellow-800' : 
-                        'bg-green-100 text-green-800'
-                      }`}>
-                        {product.stock}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.marca.nombre}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.categoria.nombre}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="flex items-center space-x-2">
-                        <Link
-                          href={`/admin/products/${product.id}/edit`}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Link>
-                        <button
-                          onClick={() => {
-                            // Implementar lógica de eliminación
-                            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-                              // TODO: Implementar eliminación
-                            }
-                          }}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        </CardHeader>
+        <CardContent>
+          <div className="relative overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b">
+                  <TableHead className="w-[70px] px-0.5 py-1">Nombre</TableHead>
+                  <TableHead className="w-[40px] px-0.5 py-1">Precio</TableHead>
+                  <TableHead className="w-[40px] px-0.5 py-1">Tipo</TableHead>
+                  <TableHead className="w-[40px] px-0.5 py-1">Unidad</TableHead>
+                  <TableHead className="w-[60px] px-0.5 py-1">Presentación</TableHead>
+                  <TableHead className="w-[40px] px-0.5 py-1">U. Medida</TableHead>
+                  <TableHead className="w-[25px] px-0.5 py-1">Stock</TableHead>
+                  <TableHead className="w-[50px] px-0.5 py-1">Marca</TableHead>
+                  <TableHead className="w-[50px] px-0.5 py-1">Categoría</TableHead>
+                  <TableHead className="w-[25px] px-0.5 py-1">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredProducts.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={11} className="text-center">
+                      No se encontraron productos
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredProducts.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell>{product.nombre}</TableCell>
+                      <TableCell>{`S/ ${product.precio.toFixed(2)}`}</TableCell>
+                      <TableCell>
+                        <Badge variant={product.tipoProducto === 'CORE' ? 'default' : 'secondary'}>
+                          {product.tipoProducto}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={product.unidadDeVenta === 'PESO' ? 'default' : 'secondary'}>
+                          {product.unidadDeVenta}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {product.presentacion ? (
+                          <Badge variant="outline">{product.presentacion}</Badge>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{product.unidadMedida}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={product.stock < 5 ? 'destructive' : product.stock < 20 ? 'secondary' : 'default'}>
+                          {product.stock}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{product.marca.nombre}</TableCell>
+                      <TableCell>{product.categoria.nombre}</TableCell>
+                      <TableCell className="sticky right-0 bg-background z-10">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/products/${product.id}/edit`} className="flex items-center">
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Editar
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => {
+                                if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+                                  handleDelete(product.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 } 
