@@ -8,7 +8,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex-shrink-0">
-              <span className="font-bold text-xl">OXA Platform</span>
+              <span className="font-bold text-xl">GOXA Platform</span>
             </div>
             <nav className="hidden md:flex space-x-8">
               <Link href="/shop" className="text-gray-700 hover:text-gray-900">Tienda</Link>
@@ -37,7 +37,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-transparent opacity-75"></div>
           </div>
           <div className="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
-            <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">OXA Platform</h1>
+            <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">GOXA Platform</h1>
             <p className="mt-6 text-xl text-gray-300 max-w-3xl">
               Plataforma integral que combina ERP, E-commerce y CRM para optimizar la gestión de tu negocio.
             </p>
@@ -100,7 +100,7 @@ export default function Home() {
       <footer className="bg-gray-800 text-white">
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <p>© {new Date().getFullYear()} OXA Platform. Todos los derechos reservados.</p>
+            <p>© {new Date().getFullYear()} GOXA Platform. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>

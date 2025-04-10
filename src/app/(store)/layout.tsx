@@ -12,7 +12,7 @@ export default function StoreLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex-shrink-0">
-              <Link href="/" className="font-bold text-xl">OXA Store</Link>
+              <Link href="/" className="font-bold text-xl">GOXA Store</Link>
             </div>
             <nav className="hidden md:flex space-x-8">
               <Link href="/shop" className="text-gray-700 hover:text-gray-900">Productos</Link>
@@ -47,7 +47,7 @@ export default function StoreLayout({
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <h3 className="text-lg font-bold mb-4">Sobre OXA</h3>
+              <h3 className="text-lg font-bold mb-4">Sobre GOXA</h3>
               <p className="text-gray-300">Plataforma integral para gestión empresarial, ventas online y relación con clientes.</p>
             </div>
             <div>
@@ -60,12 +60,12 @@ export default function StoreLayout({
             </div>
             <div>
               <h3 className="text-lg font-bold mb-4">Contacto</h3>
-              <p className="text-gray-300">info@oxaplatform.com</p>
+              <p className="text-gray-300">info@goxaplatform.com</p>
               <p className="text-gray-300">+123 456 7890</p>
             </div>
           </div>
           <div className="mt-8 border-t border-gray-700 pt-8 text-center text-gray-300">
-            <p>© {new Date().getFullYear()} OXA Platform. Todos los derechos reservados.</p>
+            <p>© {new Date().getFullYear()} GOXA Platform. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>

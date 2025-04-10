@@ -9,7 +9,7 @@ export default function AuthLayout({
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link href="/">
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">OXA Platform</h2>
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">GOXA Platform</h2>
         </Link>
       </div>
 

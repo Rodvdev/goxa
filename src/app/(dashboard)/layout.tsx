@@ -9,7 +9,7 @@ export default function DashboardLayout({
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <aside className="w-64 bg-gray-900 text-white">
-        <div className="p-4 font-bold text-xl">OXA Admin</div>
+        <div className="p-4 font-bold text-xl">GOXA Admin</div>
         <nav className="mt-6">
           <ul>
             <li>
