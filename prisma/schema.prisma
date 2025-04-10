@@ -1,0 +1,161 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// datasource y generator según tu configuración (en este ejemplo se usa PostgreSQL)
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ENUM para el tipo de producto (Core o No Core)
+enum TipoProducto {
+  CORE
+  NO_CORE
+}
+
+// ENUM para indicar si el producto se vende por peso o por unidad
+enum UnidadDeVenta {
+  PESO
+  UNIDAD
+}
+
+// Modelo para las Marcas
+model Marca {
+  id         Int         @id @default(autoincrement())
+  nombre     String
+  productos  Producto[]
+}
+
+// Modelo para las Categorías
+model Categoria {
+  id         Int         @id @default(autoincrement())
+  nombre     String
+  productos  Producto[]
+}
+
+// Modelo para los Productos
+model Producto {
+  id                 Int              @id @default(autoincrement())
+  sku                String           @unique
+  nombre             String
+  precio             Float
+  tipoProducto       TipoProducto
+  unidadDeVenta      UnidadDeVenta
+  contenido          Float?           // p.ej. peso en Kg o la medida correspondiente
+  stock              Int
+  imagen             String?          // URL o path de la imagen del producto
+  margenCommission   Float            // porcentaje de comisión para vendedores
+  categoriaId        Int
+  marcaId            Int
+  categoria          Categoria        @relation(fields: [categoriaId], references: [id])
+  marca              Marca            @relation(fields: [marcaId], references: [id])
+  packProductos      PackProducto[]
+  ventas             Venta[]
+}
+
+// Modelo para los Packs
+model Pack {
+  id              Int              @id @default(autoincrement())
+  nombre          String
+  precio          Float
+  imagen          String?          // URL o path de la imagen del pack
+  packProductos   PackProducto[]
+  ventas          Venta[]
+}
+
+// Tabla intermedia para la relación many-to-many entre Packs y Productos
+model PackProducto {
+  packId      Int
+  productoId  Int
+  cantidad    Int?       // cantidad de este producto incluido en el pack
+  pack        Pack       @relation(fields: [packId], references: [id])
+  producto    Producto   @relation(fields: [productoId], references: [id])
+  
+  @@id([packId, productoId])
+}
+
+// Modelo para los Vendedores
+model Vendedor {
+  id      Int      @id @default(autoincrement())
+  nombre  String
+  ventas  Venta[]
+}
+
+// Modelo para registrar las ventas y, de esta forma, gestionar stock, totales y comisiones
+model Venta {
+  id           Int         @id @default(autoincrement())
+  fecha        DateTime    @default(now())
+  productoId   Int?        
+  packId       Int?       // la venta puede corresponder a un producto o a un pack
+  cantidad     Int
+  precioTotal  Float      // venta total en soles
+  comision     Float      // comisión total generada por la venta
+  vendedorId   Int
+  producto     Producto?  @relation(fields: [productoId], references: [id])
+  pack         Pack?      @relation(fields: [packId], references: [id])
+  vendedor     Vendedor   @relation(fields: [vendedorId], references: [id])
+}
+
+// NextAuth Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  role          Role      @default(USER)
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  USER
+  ADMIN
+  VENDOR
+  MARKETING
+  INVENTORY
+  FINANCE
+}
