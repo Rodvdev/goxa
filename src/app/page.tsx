@@ -37,10 +37,6 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center pt-12 pb-24 bg-white text-black">
-      {/* Logo and Header */}
-      <div className="w-32 h-32 mb-6 flex items-center justify-center rounded-full bg-green-600 text-white">
-        <Leaf size={64} />
-      </div>
       
       <h1 className="text-4xl font-bold mb-2 font-poppins text-black">GOXA</h1>
       <p className="text-lg mb-8 text-center text-black max-w-sm">
