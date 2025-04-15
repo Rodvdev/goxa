@@ -66,6 +66,25 @@ export default function Home() {
           </div>
           <ChevronRight className="text-black" />
         </a>
+
+        {/* Catalog PDF Link */}
+        <a 
+          href="/catalogo.pdf" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center justify-between bg-white hover:bg-blue-50 border border-blue-200 p-4 rounded-xl shadow-sm transition-all hover:shadow-md"
+        >
+          <div className="flex items-center gap-4">
+            <div className="bg-blue-500 text-white p-3 rounded-full">
+              <BookOpen size={24} />
+            </div>
+            <div>
+              <h2 className="font-semibold text-lg text-black">Catálogo Digital</h2>
+              <p className="text-sm text-black">Mieles, orquídeas, hamburguesas y más</p>
+            </div>
+          </div>
+          <ChevronRight className="text-black" />
+        </a>
         
         {/* Instagram Link */}
         <a 
@@ -86,24 +105,7 @@ export default function Home() {
           <ChevronRight className="text-black" />
         </a>
         
-        {/* Catalog PDF Link */}
-        <a 
-          href="/catalogo.pdf" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center justify-between bg-white hover:bg-blue-50 border border-blue-200 p-4 rounded-xl shadow-sm transition-all hover:shadow-md"
-        >
-          <div className="flex items-center gap-4">
-            <div className="bg-blue-500 text-white p-3 rounded-full">
-              <BookOpen size={24} />
-            </div>
-            <div>
-              <h2 className="font-semibold text-lg text-black">Catálogo Digital</h2>
-              <p className="text-sm text-black">Mieles, orquídeas, hamburguesas y más</p>
-            </div>
-          </div>
-          <ChevronRight className="text-black" />
-        </a>
+        
         
         {/* <Link
           href="/warehouse-products"
@@ -167,6 +169,17 @@ export default function Home() {
       <footer className="mt-16 text-center text-black text-sm">
         <p>&copy; {new Date().getFullYear()} GOXA. Todos los derechos reservados.</p>
         <p className="mt-1">Lima, Perú</p>
+        <p className="mt-3">
+          Desarrollado por{" "}
+          <a 
+            href="https://rodrigovdev.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="font-medium hover:underline"
+          >
+            VdeV Digital Solutions
+          </a>
+        </p>
       </footer>
     </main>
   );
