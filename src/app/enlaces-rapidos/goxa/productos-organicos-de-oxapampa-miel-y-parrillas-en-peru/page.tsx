@@ -40,9 +40,9 @@ export default function EnlacesRapidos() {
           <ShoppingBag size={40} />
         </div>
         
-        <h1 className="text-3xl font-bold mb-2 text-center">Descubre GOXA Naturalmente</h1>
+        <h1 className="text-3xl font-bold mb-2 text-center">GOXA naturalmente</h1>
         <p className="text-lg mb-8 text-center text-gray-700 max-w-sm">
-          Sabores de Oxapampa directo a tu mesa
+        Para los que disfrutan lo natural: miel pura, flores únicas y parrillas con sabor real 🔥
         </p>
       </motion.div>
       
@@ -56,7 +56,7 @@ export default function EnlacesRapidos() {
       >
         {/* WhatsApp Link */}
         <motion.a 
-          href="https://wa.me/51998855069" 
+          href="https://wa.me/51949833976" 
           target="_blank" 
           rel="noopener noreferrer"
           className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm transition-all hover:shadow-md hover:bg-green-50"
