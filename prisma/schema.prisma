@@ -12,7 +12,6 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
-  output = "./generated/client"
 }
 
 // ENUM para el tipo de producto (Core o No Core)
@@ -56,6 +55,22 @@ model Categoria {
   productos  Producto[]
 }
 
+// Modelo para los Almacenes
+model Almacen {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  ubicacion String
+  productos Producto[]
+}
+
+// Modelo para los Productores
+model Productor {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  ubicacion String
+  productos Producto[]
+}
+
 // Modelo para los Productos
 model Producto {
   id                 Int              @id @default(autoincrement())
@@ -73,9 +88,13 @@ model Producto {
   categoriaId        Int
   marcaId            Int
   createdById        String?
+  almacenId          Int?
+  productorId        Int?
   categoria          Categoria        @relation(fields: [categoriaId], references: [id])
   marca              Marca            @relation(fields: [marcaId], references: [id])
   createdBy          User?            @relation("CreatedBy", fields: [createdById], references: [id])
+  almacen            Almacen?         @relation(fields: [almacenId], references: [id])
+  productor          Productor?       @relation(fields: [productorId], references: [id])
   packProductos      PackProducto[]
   ventas             Venta[]
 }
@@ -103,9 +122,10 @@ model PackProducto {
 
 // Modelo para los Vendedores
 model Vendedor {
-  id      Int      @id @default(autoincrement())
-  nombre  String
-  ventas  Venta[]
+  id           Int            @id @default(autoincrement())
+  nombre       String
+  ventas       Venta[]
+  ventasCliente VentaCliente[]
 }
 
 // Modelo para registrar las ventas y, de esta forma, gestionar stock, totales y comisiones
@@ -121,6 +141,80 @@ model Venta {
   producto     Producto?  @relation(fields: [productoId], references: [id])
   pack         Pack?      @relation(fields: [packId], references: [id])
   vendedor     Vendedor   @relation(fields: [vendedorId], references: [id])
+}
+
+// Modelo para Rol del cliente
+model RolCliente {
+  id            Int       @id @default(autoincrement())
+  nombre        String    @unique // Ej: Retail, Mayorista, etc.
+  descuento     Float?    // Porcentaje de descuento
+  limiteCredito Float?    // Máximo permitido
+  clientes      Cliente[]
+}
+
+// Modelo para Clientes
+model Cliente {
+  id           Int            @id @default(autoincrement())
+  nombre       String
+  email        String         @unique
+  telefono     String?
+  password     String?
+  direcciones  Direccion[]
+  ventas       VentaCliente[]
+  rolCliente   RolCliente     @relation(fields: [rolClienteId], references: [id])
+  rolClienteId Int
+  createdAt    DateTime       @default(now())
+}
+
+// Modelo para Distritos
+model Distrito {
+  id          Int         @id @default(autoincrement())
+  nombre      String
+  zona        String?
+  direcciones Direccion[]
+}
+
+// Modelo para Direcciones
+model Direccion {
+  id          Int          @id @default(autoincrement())
+  calle       String
+  distrito    Distrito     @relation(fields: [distritoId], references: [id])
+  distritoId  Int
+  cliente     Cliente?     @relation(fields: [clienteId], references: [id])
+  clienteId   Int?
+  envios      Envio[]
+  createdAt   DateTime     @default(now())
+}
+
+// Modelo para Métodos de Pago
+model MetodoPago {
+  id     Int            @id @default(autoincrement())
+  nombre String
+  ventas VentaCliente[]
+}
+
+// Modelo para Ventas a Clientes
+model VentaCliente {
+  id             Int         @id @default(autoincrement())
+  cliente        Cliente     @relation(fields: [clienteId], references: [id])
+  clienteId      Int
+  vendedor       Vendedor    @relation(fields: [vendedorId], references: [id])
+  vendedorId     Int
+  total          Float
+  metodoPago     MetodoPago  @relation(fields: [metodoPagoId], references: [id])
+  metodoPagoId   Int
+  envios         Envio[]
+  fecha          DateTime    @default(now())
+}
+
+// Modelo para Envíos
+model Envio {
+  id           Int           @id @default(autoincrement())
+  direccion    Direccion     @relation(fields: [direccionId], references: [id])
+  direccionId  Int
+  estado       String        @default("pendiente")
+  venta        VentaCliente  @relation(fields: [ventaId], references: [id])
+  ventaId      Int
 }
 
 // NextAuth Models
