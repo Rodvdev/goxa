@@ -172,6 +172,17 @@ export default function EnlacesRapidos() {
       >
         <p>&copy; {new Date().getFullYear()} GOXA. Todos los derechos reservados.</p>
         <p className="mt-1">Lima, Perú</p>
+        <p className="mt-3">
+          Desarrollado por{" "}
+          <a 
+            href="https://rodrigovdev.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="font-medium hover:underline"
+          >
+            VdeV Digital Solutions
+          </a>
+        </p>
       </motion.footer>
     </main>
   );
