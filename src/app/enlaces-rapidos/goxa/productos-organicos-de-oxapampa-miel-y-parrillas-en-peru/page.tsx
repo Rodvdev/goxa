@@ -40,7 +40,7 @@ export default function EnlacesRapidos() {
           <ShoppingBag size={40} />
         </div>
         
-        <h1 className="text-3xl font-bold mb-2 text-center">GOXA naturalmente</h1>
+        <h1 className="text-3xl font-bold mb-2 text-center">GOXA</h1>
         <p className="text-lg mb-8 text-center text-gray-700 max-w-sm">
         Para los que disfrutan lo natural: miel pura, flores únicas y parrillas con sabor real 🔥
         </p>
