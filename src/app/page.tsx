@@ -4,14 +4,14 @@ import { MessageSquare, Instagram, BookOpen, ChevronRight, Leaf, Droplet, Utensi
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center pt-12 pb-24 px-6 bg-white">
+    <main className="flex min-h-screen flex-col items-center pt-12 pb-24 px-6 bg-white text-black">
       {/* Logo and Header */}
       <div className="w-32 h-32 mb-6 flex items-center justify-center rounded-full bg-green-600 text-white">
         <Leaf size={64} />
       </div>
       
-      <h1 className="text-4xl font-bold mb-2 font-poppins text-green-800">GOXA</h1>
-      <p className="text-lg mb-8 text-center text-gray-600 max-w-sm">
+      <h1 className="text-4xl font-bold mb-2 font-poppins text-black">GOXA</h1>
+      <p className="text-lg mb-8 text-center text-black max-w-sm">
         Productos naturales y gourmet seleccionados
       </p>
       
@@ -21,28 +21,28 @@ export default function Home() {
           <div className="w-12 h-12 flex items-center justify-center bg-amber-500 text-white rounded-full mb-2">
             <Droplet size={24} />
           </div>
-          <p className="text-center font-medium">Mieles</p>
+          <p className="text-center font-medium text-black">Mieles</p>
         </div>
         
         <div className="flex flex-col items-center p-4 bg-white border border-green-200 rounded-xl">
           <div className="w-12 h-12 flex items-center justify-center bg-green-600 text-white rounded-full mb-2">
             <Leaf size={24} />
           </div>
-          <p className="text-center font-medium">Productos de Oxapampa</p>
+          <p className="text-center font-medium text-black">Productos de Oxapampa</p>
         </div>
         
         <div className="flex flex-col items-center p-4 bg-white border border-red-200 rounded-xl">
           <div className="w-12 h-12 flex items-center justify-center bg-red-600 text-white rounded-full mb-2">
             <UtensilsCrossed size={24} />
           </div>
-          <p className="text-center font-medium">Carnes y Chorizos</p>
+          <p className="text-center font-medium text-black">Hamburguesas y Chorizos</p>
         </div>
         
         <div className="flex flex-col items-center p-4 bg-white border border-purple-200 rounded-xl">
           <div className="w-12 h-12 flex items-center justify-center bg-purple-500 text-white rounded-full mb-2">
             <Flower size={24} />
           </div>
-          <p className="text-center font-medium">Orquídeas</p>
+          <p className="text-center font-medium text-black">Orquídeas</p>
         </div>
       </div>
       
@@ -60,11 +60,11 @@ export default function Home() {
               <MessageSquare size={24} />
             </div>
             <div>
-              <h2 className="font-semibold text-lg">Contáctanos por WhatsApp</h2>
-              <p className="text-gray-500 text-sm">Pide tus productos naturales y gourmet</p>
+              <h2 className="font-semibold text-lg text-black">Contáctanos por WhatsApp</h2>
+              <p className="text-sm text-black">Pide tus productos naturales y gourmet</p>
             </div>
           </div>
-          <ChevronRight className="text-gray-400" />
+          <ChevronRight className="text-black" />
         </a>
         
         {/* Instagram Link */}
@@ -79,11 +79,11 @@ export default function Home() {
               <Instagram size={24} />
             </div>
             <div>
-              <h2 className="font-semibold text-lg">Síguenos en Instagram</h2>
-              <p className="text-gray-500 text-sm">@goxa_pe</p>
+              <h2 className="font-semibold text-lg text-black">Síguenos en Instagram</h2>
+              <p className="text-sm text-black">@goxa_pe</p>
             </div>
           </div>
-          <ChevronRight className="text-gray-400" />
+          <ChevronRight className="text-black" />
         </a>
         
         {/* Catalog PDF Link */}
@@ -98,11 +98,11 @@ export default function Home() {
               <BookOpen size={24} />
             </div>
             <div>
-              <h2 className="font-semibold text-lg">Catálogo Digital</h2>
-              <p className="text-gray-500 text-sm">Mieles, orquídeas, carnes y más</p>
+              <h2 className="font-semibold text-lg text-black">Catálogo Digital</h2>
+              <p className="text-sm text-black">Mieles, orquídeas, hamburguesas y más</p>
             </div>
           </div>
-          <ChevronRight className="text-gray-400" />
+          <ChevronRight className="text-black" />
         </a>
         
         {/* <Link
@@ -125,8 +125,8 @@ export default function Home() {
       {/* Product Highlight */}
       <div className="mt-10 w-full max-w-md bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
         <div className="p-4 text-center">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Destacados</h2>
-          <p className="text-gray-600 mb-4">Productos de temporada seleccionados para ti</p>
+          <h2 className="text-xl font-bold text-black mb-2">Destacados</h2>
+          <p className="text-black mb-4">Productos de temporada seleccionados para ti</p>
         </div>
         <div className="bg-white p-4 border-t border-gray-100">
           <div className="flex items-center gap-4">
@@ -134,8 +134,8 @@ export default function Home() {
               <Droplet className="text-amber-700" size={24} />
             </div>
             <div>
-              <h3 className="font-semibold">Miel de Oxapampa</h3>
-              <p className="text-sm text-gray-500">100% natural, sin aditivos</p>
+              <h3 className="font-semibold text-black">Miel de Oxapampa</h3>
+              <p className="text-sm text-black">100% natural, sin aditivos</p>
             </div>
           </div>
         </div>
@@ -145,8 +145,8 @@ export default function Home() {
               <UtensilsCrossed className="text-red-700" size={24} />
             </div>
             <div>
-              <h3 className="font-semibold">Chorizos para Parrilla</h3>
-              <p className="text-sm text-gray-500">Preparación artesanal</p>
+              <h3 className="font-semibold text-black">Hamburguesas para Parrilla</h3>
+              <p className="text-sm text-black">Preparación artesanal</p>
             </div>
           </div>
         </div>
@@ -156,15 +156,15 @@ export default function Home() {
               <Flower className="text-purple-700" size={24} />
             </div>
             <div>
-              <h3 className="font-semibold">Orquídeas Selva Central</h3>
-              <p className="text-sm text-gray-500">Cultivo responsable</p>
+              <h3 className="font-semibold text-black">Orquídeas Selva Central</h3>
+              <p className="text-sm text-black">Cultivo responsable</p>
             </div>
           </div>
         </div>
       </div>
       
       {/* Footer */}
-      <footer className="mt-16 text-center text-gray-500 text-sm">
+      <footer className="mt-16 text-center text-black text-sm">
         <p>&copy; {new Date().getFullYear()} GOXA. Todos los derechos reservados.</p>
         <p className="mt-1">Lima, Perú</p>
       </footer>
