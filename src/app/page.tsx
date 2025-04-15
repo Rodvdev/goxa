@@ -1,8 +1,40 @@
-import Link from "next/link";
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef } from "react";
 import { MessageSquare, Instagram, BookOpen, ChevronRight, Leaf, Droplet, UtensilsCrossed, Flower } from "lucide-react";
 
+// Items duplicados para el efecto de scroll infinito
+const categoryItems = [
+  { icon: Droplet, bg: "bg-amber-500", name: "Mieles" },
+  { icon: Leaf, bg: "bg-green-600", name: "Productos Orgánicos" },
+  { icon: UtensilsCrossed, bg: "bg-red-600", name: "Hamburguesas y Chorizos" },
+  { icon: Flower, bg: "bg-purple-500", name: "Orquídeas" },
+];
+
 export default function Home() {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Configurar animación de scroll infinito
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    // Iniciar animación en intervalos para auto-scroll
+    const autoScroll = setInterval(() => {
+      if (scrollContainer.scrollLeft + scrollContainer.clientWidth >= scrollContainer.scrollWidth) {
+        // Cuando llegue al final, volver al inicio suavemente
+        scrollContainer.scrollTo({ left: 0, behavior: "auto" });
+      } else {
+        // Desplazar suavemente
+        scrollContainer.scrollBy({ left: 2, behavior: "smooth" });
+      }
+    }, 50);
+
+    return () => {
+      clearInterval(autoScroll);
+    };
+  }, []);
+
   return (
     <main className="flex min-h-screen flex-col items-center pt-12 pb-24 px-6 bg-white text-black">
       {/* Logo and Header */}
@@ -15,34 +47,41 @@ export default function Home() {
         Productos naturales y gourmet seleccionados
       </p>
       
-      {/* Product Categories */}
-      <div className="w-full max-w-xl grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="flex flex-col items-center p-4 bg-white border border-amber-200 rounded-xl">
-          <div className="w-12 h-12 flex items-center justify-center bg-amber-500 text-white rounded-full mb-2">
-            <Droplet size={24} />
-          </div>
-          <p className="text-center font-medium text-black">Mieles</p>
-        </div>
-        
-        <div className="flex flex-col items-center p-4 bg-white border border-green-200 rounded-xl">
-          <div className="w-12 h-12 flex items-center justify-center bg-green-600 text-white rounded-full mb-2">
-            <Leaf size={24} />
-          </div>
-          <p className="text-center font-medium text-black">Productos de Oxapampa</p>
-        </div>
-        
-        <div className="flex flex-col items-center p-4 bg-white border border-red-200 rounded-xl">
-          <div className="w-12 h-12 flex items-center justify-center bg-red-600 text-white rounded-full mb-2">
-            <UtensilsCrossed size={24} />
-          </div>
-          <p className="text-center font-medium text-black">Hamburguesas y Chorizos</p>
-        </div>
-        
-        <div className="flex flex-col items-center p-4 bg-white border border-purple-200 rounded-xl">
-          <div className="w-12 h-12 flex items-center justify-center bg-purple-500 text-white rounded-full mb-2">
-            <Flower size={24} />
-          </div>
-          <p className="text-center font-medium text-black">Orquídeas</p>
+      {/* Product Categories - Infinitely Scrolling */}
+      <div 
+        ref={scrollContainerRef}
+        className="w-full max-w-full overflow-x-auto scrollbar-hide mb-8 py-4"
+      >
+        <div className="flex px-2 animate-scroll">
+          {/* Render original items */}
+          {categoryItems.map((item, index) => (
+            <div key={`item-${index}`} className="flex flex-col items-center px-3 flex-shrink-0">
+              <div className={`w-16 h-16 flex items-center justify-center ${item.bg} text-white rounded-full mb-2 shadow-md`}>
+                <item.icon size={32} />
+              </div>
+              <p className="text-center font-medium text-black w-24">{item.name}</p>
+            </div>
+          ))}
+          
+          {/* Duplicated items for infinite scroll effect */}
+          {categoryItems.map((item, index) => (
+            <div key={`duplicate-${index}`} className="flex flex-col items-center px-3 flex-shrink-0">
+              <div className={`w-16 h-16 flex items-center justify-center ${item.bg} text-white rounded-full mb-2 shadow-md`}>
+                <item.icon size={32} />
+              </div>
+              <p className="text-center font-medium text-black w-24">{item.name}</p>
+            </div>
+          ))}
+          
+          {/* Segunda duplicación para asegurar que haya suficientes elementos */}
+          {categoryItems.map((item, index) => (
+            <div key={`duplicate2-${index}`} className="flex flex-col items-center px-3 flex-shrink-0">
+              <div className={`w-16 h-16 flex items-center justify-center ${item.bg} text-white rounded-full mb-2 shadow-md`}>
+                <item.icon size={32} />
+              </div>
+              <p className="text-center font-medium text-black w-24">{item.name}</p>
+            </div>
+          ))}
         </div>
       </div>
       
@@ -53,7 +92,7 @@ export default function Home() {
           href="https://wa.me/51998855069" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="flex items-center justify-between bg-white hover:bg-green-50 border border-green-200 p-4 rounded-xl shadow-sm transition-all hover:shadow-md"
+          className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm transition-all hover:shadow-md"
         >
           <div className="flex items-center gap-4">
             <div className="bg-green-500 text-white p-3 rounded-full">
@@ -66,13 +105,13 @@ export default function Home() {
           </div>
           <ChevronRight className="text-black" />
         </a>
-
+        
         {/* Catalog PDF Link */}
         <a 
           href="/catalogo.pdf" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="flex items-center justify-between bg-white hover:bg-blue-50 border border-blue-200 p-4 rounded-xl shadow-sm transition-all hover:shadow-md"
+          className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm transition-all hover:shadow-md"
         >
           <div className="flex items-center gap-4">
             <div className="bg-blue-500 text-white p-3 rounded-full">
@@ -91,7 +130,7 @@ export default function Home() {
           href="https://www.instagram.com/goxa_pe" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="flex items-center justify-between bg-white hover:bg-pink-50 border border-pink-200 p-4 rounded-xl shadow-sm transition-all hover:shadow-md"
+          className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm transition-all hover:shadow-md"
         >
           <div className="flex items-center gap-4">
             <div className="bg-gradient-to-tr from-purple-500 to-pink-500 text-white p-3 rounded-full">
@@ -104,28 +143,10 @@ export default function Home() {
           </div>
           <ChevronRight className="text-black" />
         </a>
-        
-        
-        
-        {/* <Link
-          href="/warehouse-products"
-          className="flex items-center justify-between bg-white hover:bg-amber-50 border border-amber-200 p-4 rounded-xl shadow-sm transition-all hover:shadow-md"
-        >
-          <div className="flex items-center gap-4">
-            <div className="bg-amber-500 text-white p-3 rounded-full">
-              <Warehouse size={24} />
-            </div>
-            <div>
-              <h2 className="font-semibold text-lg">Inventario</h2>
-              <p className="text-gray-500 text-sm">Gestión de almacenes</p>
-            </div>
-          </div>
-          <ChevronRight className="text-gray-400" />
-        </Link> */}
       </div>
       
       {/* Product Highlight */}
-      <div className="mt-10 w-full max-w-md bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+      <div className="mt-10 w-full max-w-md bg-white rounded-xl shadow-md overflow-hidden">
         <div className="p-4 text-center">
           <h2 className="text-xl font-bold text-black mb-2">Destacados</h2>
           <p className="text-black mb-4">Productos de temporada seleccionados para ti</p>
@@ -183,4 +204,4 @@ export default function Home() {
       </footer>
     </main>
   );
-} 
+}
