@@ -56,7 +56,7 @@ export default function EnlacesRapidos() {
       >
         {/* WhatsApp Link */}
         <motion.a 
-          href="https://wa.me/51949833976" 
+          href="https://wa.me/51998855069?text=Hola%20GOXA%2C%20me%20interesan%20sus%20productos.%20Quisiera%20consultar%20sobre%20precios%20y%20disponibilidad.%20%C2%A1Gracias!" 
           target="_blank" 
           rel="noopener noreferrer"
           className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm transition-all hover:shadow-md hover:bg-green-50"

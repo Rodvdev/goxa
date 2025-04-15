@@ -60,10 +60,11 @@ export default function Home() {
     
     const startAutoScroll = () => {
       scrollInterval = setInterval(() => {
-        if (scrollContainer && !scrollContainer.matches(':hover')) {
+        // Always scroll without checking for hover to ensure continuous movement
+        if (scrollContainer) {
           scrollContainer.scrollLeft += 1;
         }
-      }, 30);
+      }, 20); // Slightly faster scroll speed
     };
     
     startAutoScroll();
@@ -93,7 +94,7 @@ export default function Home() {
             msOverflowStyle: 'none'
           }}
         >
-          <div className="flex px-4 md:px-8 gap-6 md:gap-10">
+          <div className="flex px-4 md:px-8 gap-6 md:gap-10 animate-infinite-scroll">
             {/* First set of items */}
             {categoryItems.map((item, index) => (
               <div key={`item-${index}`} className="flex flex-col items-center flex-shrink-0">

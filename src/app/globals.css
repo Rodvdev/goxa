@@ -85,8 +85,14 @@
     transition: all 0.5s ease;
   }
 
+  /* Animación para el scroll infinito mejorado */
+  .animate-infinite-scroll {
+    animation: smoothInfiniteScroll 25s linear infinite;
+  }
+
   /* Pausar la animación al hacer hover */
-  .animate-scroll:hover {
+  .animate-scroll:hover,
+  .animate-infinite-scroll:hover {
     animation-play-state: paused;
   }
 }
@@ -130,6 +136,12 @@
   100% {
     transform: translateX(calc(-100% / 2));
   }
+}
+
+/* Keyframes para el scroll infinito mejorado */
+@keyframes smoothInfiniteScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 @media (prefers-color-scheme: dark) {
