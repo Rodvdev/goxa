@@ -36,7 +36,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center pt-12 pb-24 px-6 bg-white text-black">
+    <main className="flex min-h-screen flex-col items-center pt-12 pb-24 bg-white text-black">
       {/* Logo and Header */}
       <div className="w-32 h-32 mb-6 flex items-center justify-center rounded-full bg-green-600 text-white">
         <Leaf size={64} />
@@ -50,7 +50,7 @@ export default function Home() {
       {/* Product Categories - Infinitely Scrolling */}
       <div 
         ref={scrollContainerRef}
-        className="w-full max-w-full overflow-x-auto scrollbar-hide mb-8 py-4"
+        className="w-full max-w-full overflow-x-auto scrollbar-hide mb-8 py-4 "
       >
         <div className="flex px-2 animate-scroll">
           {/* Render original items */}
@@ -86,7 +86,7 @@ export default function Home() {
       </div>
       
       {/* Link Tree */}
-      <div className="w-full max-w-md flex flex-col gap-4">
+      <div className="w-full max-w-md flex flex-col gap-4 px-6">
         {/* WhatsApp Link */}
         <a 
           href="https://wa.me/51998855069" 
@@ -146,45 +146,45 @@ export default function Home() {
       </div>
       
       {/* Product Highlight */}
-      <div className="mt-10 w-full max-w-md bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-4 text-center">
-          <h2 className="text-xl font-bold text-black mb-2">Destacados</h2>
-          <p className="text-black mb-4">Productos de temporada seleccionados para ti</p>
-        </div>
-        <div className="bg-white p-4 border-t border-gray-100">
-          <div className="flex items-center gap-4">
-            <div className="bg-amber-100 p-3 rounded-full">
-              <Droplet className="text-amber-700" size={24} />
+        {/* <div className="mt-10 w-full max-w-md bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="p-4 text-center">
+            <h2 className="text-xl font-bold text-black mb-2">Destacados</h2>
+            <p className="text-black mb-4">Productos de temporada seleccionados para ti</p>
             </div>
-            <div>
-              <h3 className="font-semibold text-black">Miel de Oxapampa</h3>
-              <p className="text-sm text-black">100% natural, sin aditivos</p>
+            <div className="bg-white p-4 border-t border-gray-100">
+            <div className="flex items-center gap-4">
+                <div className="bg-amber-100 p-3 rounded-full">
+                <Droplet className="text-amber-700" size={24} />
+                </div>
+                <div>
+                <h3 className="font-semibold text-black">Miel de Oxapampa</h3>
+                <p className="text-sm text-black">100% natural, sin aditivos</p>
+                </div>
             </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 border-t border-gray-100">
-          <div className="flex items-center gap-4">
-            <div className="bg-red-100 p-3 rounded-full">
-              <UtensilsCrossed className="text-red-700" size={24} />
             </div>
-            <div>
-              <h3 className="font-semibold text-black">Hamburguesas para Parrilla</h3>
-              <p className="text-sm text-black">Preparación artesanal</p>
+            <div className="bg-white p-4 border-t border-gray-100">
+            <div className="flex items-center gap-4">
+                <div className="bg-red-100 p-3 rounded-full">
+                <UtensilsCrossed className="text-red-700" size={24} />
+                </div>
+                <div>
+                <h3 className="font-semibold text-black">Hamburguesas para Parrilla</h3>
+                <p className="text-sm text-black">Preparación artesanal</p>
+                </div>
             </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 border-t border-gray-100">
-          <div className="flex items-center gap-4">
-            <div className="bg-purple-100 p-3 rounded-full">
-              <Flower className="text-purple-700" size={24} />
             </div>
-            <div>
-              <h3 className="font-semibold text-black">Orquídeas Selva Central</h3>
-              <p className="text-sm text-black">Cultivo responsable</p>
+            <div className="bg-white p-4 border-t border-gray-100">
+            <div className="flex items-center gap-4">
+                <div className="bg-purple-100 p-3 rounded-full">
+                <Flower className="text-purple-700" size={24} />
+                </div>
+                <div>
+                <h3 className="font-semibold text-black">Orquídeas Selva Central</h3>
+                <p className="text-sm text-black">Cultivo responsable</p>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
+            </div>
+        </div> */}
       
       {/* Footer */}
       <footer className="mt-16 text-center text-black text-sm">
