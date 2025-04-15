@@ -186,7 +186,7 @@ export default function Home() {
       <footer className="mt-16 text-center text-black text-sm">
         <p>&copy; {new Date().getFullYear()} GOXA. Todos los derechos reservados.</p>
         <p className="mt-1">Lima, Perú</p>
-        {/* <p className="mt-3">
+        <p className="mt-3">
           Desarrollado por{" "}
           <a 
             href="https://rodrigovdev.com" 
@@ -196,7 +196,7 @@ export default function Home() {
           >
             VdeV Digital Solutions
           </a>
-        </p> */}
+        </p>
       </footer>
     </main>
   );
