@@ -278,3 +278,115 @@ enum Role {
   INVENTORY
   FINANCE
 }
+
+// Modelo para las Preferencias del Cliente
+model ClientePreferencias {
+  id                    String    @id @default(cuid())
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Información Básica del Cliente
+  nombreCliente         String
+  emailCliente          String
+  telefonoCliente       String?
+  empresa               String?
+  cargo                 String?
+  
+  // Información del Negocio
+  tipoNegocio           String?   // "productos_naturales", "ecommerce", "restaurante", "distribuidor"
+  tamanioEmpresa        String?   // "pequena", "mediana", "grande"
+  anosExperiencia       Int?      // Años en el negocio
+  ubicacion             String?   // Ciudad/Región
+  
+  // Objetivos del Sitio Web
+  objetivoPrincipal     String?   // "ventas_online", "mostrar_productos", "generar_leads", "branding"
+  publicoObjetivo       String?   // "consumidores_finales", "mayoristas", "restaurantes", "todos"
+  presupuestoAproximado String?   // "menos_5000", "5000_15000", "15000_30000", "mas_30000"
+  
+  // Preferencias de Diseño
+  estiloVisual          String?   // "moderno", "tradicional", "minimalista", "colorido", "elegante"
+  coloresPreferidos     String?   // JSON array de colores
+  coloresEvitar         String?   // JSON array de colores a evitar
+  fuentesPreferidas     String?   // JSON array de fuentes
+  tonoComunicacion      String?   // "formal", "casual", "amigable", "profesional", "cercano"
+  
+  // Funcionalidades Deseadas
+  necesitaEcommerce     Boolean   @default(false)
+  necesitaCarrito       Boolean   @default(false)
+  necesitaPagos         Boolean   @default(false)
+  necesitaInventario    Boolean   @default(false)
+  necesitaCRM           Boolean   @default(false)
+  necesitaBlog          Boolean   @default(false)
+  necesitaGaleria       Boolean   @default(false)
+  necesitaTestimonios   Boolean   @default(false)
+  necesitaChat          Boolean   @default(false)
+  necesitaWhatsapp      Boolean   @default(false)
+  necesitaEmail         Boolean   @default(false)
+  necesitaAnalytics     Boolean   @default(false)
+  necesitaSEO           Boolean   @default(false)
+  necesitaMultiIdioma   Boolean   @default(false)
+  necesitaResponsive    Boolean   @default(true)
+  
+  // Productos y Contenido
+  cantidadProductos     Int?      // Número aproximado de productos
+  categoriasProductos   String?   // JSON array de categorías
+  necesitaCatalogo      Boolean   @default(false)
+  necesitaFiltros       Boolean   @default(false)
+  necesitaBusqueda      Boolean   @default(false)
+  necesitaComparacion   Boolean   @default(false)
+  necesitaWishlist      Boolean   @default(false)
+  
+  // Integraciones
+  redesSociales         String?   // JSON array de redes sociales
+  plataformasPago       String?   // JSON array de métodos de pago
+  serviciosEnvio        String?   // JSON array de servicios de envío
+  herramientasExistentes String?  // JSON array de herramientas actuales
+  
+  // Contenido Específico
+  tieneLogo             Boolean   @default(false)
+  tieneImagenes         Boolean   @default(false)
+  tieneVideos           Boolean   @default(false)
+  tieneContenido        Boolean   @default(false)
+  necesitaFotografia    Boolean   @default(false)
+  necesitaVideos        Boolean   @default(false)
+  necesitaCopywriting   Boolean   @default(false)
+  
+  // SEO y Marketing
+  palabrasClave         String?   // JSON array de palabras clave
+  competidores          String?   // JSON array de competidores
+  necesitaGoogleAds     Boolean   @default(false)
+  necesitaFacebookAds   Boolean   @default(false)
+  necesitaEmailMarketing Boolean  @default(false)
+  necesitaRetargeting   Boolean   @default(false)
+  
+  // Técnico
+  hostingPreferido      String?   // "vercel", "netlify", "aws", "otro"
+  dominioTiene          Boolean   @default(false)
+  dominioPreferido      String?
+  necesitaSSL           Boolean   @default(true)
+  necesitaBackup        Boolean   @default(false)
+  necesitaMantenimiento Boolean  @default(false)
+  
+  // Plazos y Expectativas
+  fechaLanzamiento      DateTime?
+  urgencia              String?   // "baja", "media", "alta", "critica"
+  prioridades           String?   // JSON array de prioridades
+  restricciones         String?   // Texto libre de restricciones
+  
+  // Presupuesto Detallado
+  presupuestoDiseno     String?   // "menos_2000", "2000_5000", "5000_10000", "mas_10000"
+  presupuestoDesarrollo String?   // "menos_5000", "5000_15000", "15000_30000", "mas_30000"
+  presupuestoMarketing  String?   // "menos_1000", "1000_3000", "3000_5000", "mas_5000"
+  presupuestoMantenimiento String? // "menos_500", "500_1000", "1000_2000", "mas_2000"
+  
+  // Información Adicional
+  comentariosAdicionales String?  @db.Text
+  referencias            String?   // JSON array de sitios web de referencia
+  funcionalidadesEspeciales String? @db.Text
+  limitacionesTecnicas   String?   @db.Text
+  
+  // Estado del Formulario
+  completado            Boolean   @default(false)
+  fechaCompletado       DateTime?
+  versionFormulario     String    @default("1.0")
+}

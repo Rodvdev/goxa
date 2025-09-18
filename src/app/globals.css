@@ -36,6 +36,13 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+    
+    /* GOXA Brand Colors */
+    --whatsapp-green: #25D366;
+    --whatsapp-green-hover: #128C7E;
+    --amber-primary: #F59E0B;
+    --green-natural: #10B981;
+    --red-terracotta: #DC2626;
   }
 
   .dark {
@@ -107,6 +114,53 @@
   .scrollbar-hide {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+  }
+
+  /* GOXA Landing Page Utilities */
+  .text-whatsapp {
+    color: var(--whatsapp-green);
+  }
+
+  .bg-whatsapp {
+    background-color: var(--whatsapp-green);
+  }
+
+  .bg-whatsapp-hover:hover {
+    background-color: var(--whatsapp-green-hover);
+  }
+
+  .text-amber-primary {
+    color: var(--amber-primary);
+  }
+
+  .bg-amber-primary {
+    background-color: var(--amber-primary);
+  }
+
+  .text-green-natural {
+    color: var(--green-natural);
+  }
+
+  .bg-green-natural {
+    background-color: var(--green-natural);
+  }
+
+  .text-red-terracotta {
+    color: var(--red-terracotta);
+  }
+
+  .bg-red-terracotta {
+    background-color: var(--red-terracotta);
+  }
+
+  /* Hero section gradient */
+  .hero-gradient {
+    background: linear-gradient(135deg, #F59E0B 0%, #10B981 50%, #25D366 100%);
+  }
+
+  /* Trust badge styles */
+  .trust-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700 border border-green-200;
   }
 }
 
